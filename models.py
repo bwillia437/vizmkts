@@ -6,7 +6,7 @@ from .configmanager import ConfigManager
 
 
 class Constants(BaseConstants):
-    name_in_url = 'otree_single_asset_market'
+    name_in_url = 'otree_visual_markets'
     players_per_group = None
     num_rounds = 99 
 

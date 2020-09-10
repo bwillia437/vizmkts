@@ -9,6 +9,7 @@ import '/static/otree_markets/simple_modal.js';
 import '/static/otree_markets/event_log.js';
 
 import './order_enter_widget.js';
+import './heatmap-element.js';
 
 /*
     this component is a single-asset market, implemented using otree_markets' trader_state component and some of
@@ -62,6 +63,10 @@ class SingleAssetTextInterface extends PolymerElement {
 
                 order-list, trade-list, event-log {
                     border: 1px solid black;
+                }
+
+                heatmap-element {
+                    height: 400px;
                 }
             </style>
 
@@ -131,6 +136,11 @@ class SingleAssetTextInterface extends PolymerElement {
                     ></event-log>
                 </div>
             </div>
+            <heatmap-element
+                x-bounds="[1, 6]"
+                y-bounds="[0, 5]"
+                max-utility="200"
+            ></heatmap-element>
         `;
     }
 

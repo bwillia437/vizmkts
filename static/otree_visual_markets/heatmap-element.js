@@ -94,7 +94,7 @@ class HeatmapElement extends PolymerElement {
     static get observers() {
         return [
             'drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height)',
-            'drawHoverCurve(mouseX, mouseY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
+            'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
         ]
     }
@@ -190,19 +190,24 @@ class HeatmapElement extends PolymerElement {
         this.mouseY = null;
     }
 
-    drawHoverCurve(mouseX, mouseY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
+    drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
         const ctx = this.$.hover_curve_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
         // if mouse coordinates aren't defined, or are outside the screen bounds, just return after clearing the hover canvas
-        if (mouseX === null || mouseY === null || mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
+        if (mouseX === null || mouseY === null ||mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
             return;
         }
 
         const x = remap(mouseX, 0, width, xBounds[0], xBounds[1]);
         const y = remap(mouseY, 0, height, yBounds[1], yBounds[0]);
+
+        if ((x < currentX && y < currentY) || (x > this.currentX && y > this.currentY)) {
+            return;
+        }
+
         const utility = utilityFunction(x, y);
         this.drawIndifferenceCurve(utility, ctx, quadTree, width, height);
     }
@@ -221,14 +226,21 @@ class HeatmapElement extends PolymerElement {
         const utility = utilityFunction(currentX, currentY);
         this.drawIndifferenceCurve(utility, ctx, quadTree, width, height);
 
+        // the current bundle in screen coordinates
+        const screenX = remap(currentX, xBounds[0], xBounds[1], 0, width);
+        const screenY = remap(currentY, yBounds[1], yBounds[0], 0, height);
+
+        // draw greyed-out squares for impossible trades
+        ctx.beginPath()
+        ctx.rect(screenX, 0, width-screenX, height-screenY);
+        ctx.rect(0, screenY, screenX, screenY);
+        ctx.fillStyle = 'rgba(1, 1, 1, 0.2)';
+        ctx.fill();
+
         // draw circle centered at current bundle
-        const COLOR = 'yellow';
-        const RADIUS = 7;
-        const x = remap(currentX, xBounds[0], xBounds[1], 0, width);
-        const y = remap(currentY, yBounds[1], yBounds[0], 0, height);
         ctx.beginPath();
-        ctx.arc(x, y, RADIUS, 0, 2*Math.PI);
-        ctx.fillStyle = COLOR;
+        ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+        ctx.fillStyle = 'yellow';
         ctx.fill();
         ctx.stroke();
     }

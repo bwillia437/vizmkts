@@ -23,10 +23,10 @@ class SingleAssetTextInterface extends PolymerElement {
             bids: Array,
             asks: Array,
             trades: Array,
-            settledAssets: Number,
-            availableAssets: Number,
-            settledCash: Number,
-            availableCash: Number,
+            settledX: Number,
+            availableX: Number,
+            settledY: Number,
+            availableY: Number,
         };
     }
 
@@ -99,10 +99,10 @@ class SingleAssetTextInterface extends PolymerElement {
                 bids="{{bids}}"
                 asks="{{asks}}"
                 trades="{{trades}}"
-                settled-assets="{{settledAssets}}"
-                available-assets="{{availableAssets}}"
-                settled-cash="{{settledCash}}"
-                available-cash="{{availableCash}}"
+                settled-assets="{{settledX}}"
+                available-assets="{{availableX}}"
+                settled-cash="{{settledY}}"
+                available-cash="{{availableY}}"
                 on-confirm-trade="_confirm_trade"
                 on-confirm-cancel="_confirm_cancel"
                 on-error="_handle_error"
@@ -141,8 +141,8 @@ class SingleAssetTextInterface extends PolymerElement {
                                 id="heatmap"
                                 x-bounds="[0, 10]"
                                 y-bounds="[0, 10]"
-                                current-x="5"
-                                current-y="5"
+                                current-x="[[ settledX ]]"
+                                current-y="[[ settledY ]]"
                                 max-utility="1000"
                             ></heatmap-element>
                         </div>

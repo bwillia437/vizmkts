@@ -16,7 +16,7 @@ import './heatmap-element.js';
     otree_markets' reusable UI widgets.
 */
 
-class SingleAssetTextInterface extends PolymerElement {
+class VisualMarkets extends PolymerElement {
 
     static get properties() {
         return {
@@ -224,4 +224,4 @@ class SingleAssetTextInterface extends PolymerElement {
     }
 }
 
-window.customElements.define('single-asset-text-interface', SingleAssetTextInterface);
+window.customElements.define('visual-markets', VisualMarkets);

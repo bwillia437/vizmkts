@@ -55,8 +55,8 @@ class HeatmapElement extends PolymerElement {
             
             <div id="container" on-mousemove="hover" on-mouseout="mouseout">
                 <canvas id="heatmap_canvas"></canvas>
-                <canvas id="current_curve_canvas"></canvas>
                 <canvas id="hover_curve_canvas"></canvas>
+                <canvas id="current_bundle_canvas"></canvas>
             </div>
         `;
     }
@@ -72,9 +72,6 @@ class HeatmapElement extends PolymerElement {
             },
             utilityFunction: {
                 type: Object,
-                value: function () {
-                    return (x, y) => 100 * x ** 0.5 * y ** 0.5;
-                }
             },
             xBounds: Array,
             yBounds: Array,
@@ -87,7 +84,7 @@ class HeatmapElement extends PolymerElement {
                 type: Number,
                 value: 10,
             },
-            _quadTree: {
+            quadTree: {
                 type: Object,
                 computed: 'computeQuadTree(_quadTreeGridSize, utilityFunction, xBounds, yBounds, width, height)',
             }
@@ -97,7 +94,8 @@ class HeatmapElement extends PolymerElement {
     static get observers() {
         return [
             'drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height)',
-            'drawHoverCurve(mouseX, mouseY, utilityFunction, xBounds, yBounds, width, height, _quadTree)',
+            'drawHoverCurve(mouseX, mouseY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
+            'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
         ]
     }
 
@@ -133,17 +131,14 @@ class HeatmapElement extends PolymerElement {
      * Draw an indifference curve for a given utility value
      * 
      * @param {Number} utility The utility value this indifference curve goes through
-     * @param {Node} canvas The canvas element this indifference curve is to be drawn on
+     * @param {CanvasRenderingContext2D} ctx A rendering context which is to be used to draw the curve
      * @param {MarchingSquaresJS.QuadTree} quadTree A quadtree object containing the utility data
      * @param {Number} width The width of the canvas
      * @param {Number} height The height of the canvas
      */
-    drawIndifferenceCurve(utility, canvas, quadTree) {
-        console.log(utility);
-        const ctx = canvas.getContext('2d');
+    drawIndifferenceCurve(utility, ctx, quadTree, width, height) {
+        ctx.save();
         const gridSize = this._quadTreeGridSize;
-        // clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         const paths = MarchingSquaresJS.isoLines(quadTree, utility, {noFrame: true});
         for (const path of paths) {
             ctx.beginPath();
@@ -160,11 +155,14 @@ class HeatmapElement extends PolymerElement {
             }
             ctx.stroke();
         }
+        ctx.restore();
     }
 
     /**
      * Update mouseX and mouseY variables
-     * Throttle rate of update so js doesn't get overloaded
+     * Throttle rate of update so hover curve update doesn't get called too frequently.
+     * Not sure throttling is really required since curves are drawn pretty quickly, but it's
+     * probably a good idea anyways.
      *
      * @param {*} e mousemove event
      */
@@ -194,16 +192,42 @@ class HeatmapElement extends PolymerElement {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
+        const ctx = this.$.hover_curve_canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
         if (mouseX === null || mouseY === null) {
-            const ctx = this.$.hover_curve_canvas.getContext('2d');
-            ctx.clearRect(0, 0, width, height);
             return;
         }
 
         const x = remap(mouseX, 0, width, xBounds[0], xBounds[1]);
         const y = remap(mouseY, 0, height, yBounds[1], yBounds[0]);
         const utility = utilityFunction(x, y);
-        this.drawIndifferenceCurve(utility, this.$.hover_curve_canvas, quadTree, width, height);
+        this.drawIndifferenceCurve(utility, ctx, quadTree, width, height);
+    }
+
+    drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
+        // if any arguments are undefined, just return
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const ctx = this.$.current_bundle_canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+        if (currentX === null || currentY === null) {
+            return;
+        }
+
+        // draw indifference curve for current bundle
+        const utility = utilityFunction(currentX, currentY);
+        this.drawIndifferenceCurve(utility, ctx, quadTree, width, height);
+
+        // draw circle centered at current bundle
+        const COLOR = 'yellow';
+        const RADIUS = 7;
+        const x = remap(currentX, xBounds[0], xBounds[1], 0, width);
+        const y = remap(currentY, yBounds[1], yBounds[0], 0, height);
+        ctx.beginPath();
+        ctx.arc(x, y, RADIUS, 0, 2*Math.PI);
+        ctx.fillStyle = COLOR;
+        ctx.fill();
+        ctx.stroke();
     }
 
     /**

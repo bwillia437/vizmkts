@@ -138,8 +138,11 @@ class SingleAssetTextInterface extends PolymerElement {
                     <div class="heatmap-cell">
                         <div class="square-aspect">
                             <heatmap-element
+                                id="heatmap"
                                 x-bounds="[0, 10]"
                                 y-bounds="[0, 10]"
+                                current-x="5"
+                                current-y="5"
                                 max-utility="1000"
                             ></heatmap-element>
                         </div>
@@ -153,6 +156,7 @@ class SingleAssetTextInterface extends PolymerElement {
     ready() {
         super.ready();
         this.pcode = this.$.constants.participantCode;
+        this.$.heatmap.utilityFunction = (x, y) => 100 * x ** 0.5 * y ** 0.5;
     }
 
     // triggered when this player enters an order

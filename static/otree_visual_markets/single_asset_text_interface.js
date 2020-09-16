@@ -33,6 +33,15 @@ class SingleAssetTextInterface extends PolymerElement {
     static get template() {
         return html`
             <style>
+                * {
+                    box-sizing: border-box;
+                }
+                .full-width {
+                    width: 100vw;
+                    margin-left: 50%;
+                    transform: translateX(-50%);
+                }
+
                 .container {
                     display: flex;
                     justify-content: space-evenly;
@@ -47,26 +56,35 @@ class SingleAssetTextInterface extends PolymerElement {
                 }
 
                 #main-container {
-                    height: 40vh;
-                    margin-bottom: 10px;
+                    padding: 10px;
                 }
                 #main-container > div {
-                    flex: 0 1 20%;
+                    margin: 5px;
+                }
+                .list-cell {
+                    flex: 0 1 15%;
+                }
+                .heatmap-cell {
+                    flex: 1;
+                    max-width: 80vh;
                 }
 
-                #log-container {
-                    height: 20vh;
-                }
-                #log-container > div {
-                    flex: 0 1 90%;
-                }
-
-                order-list, trade-list, event-log {
+                order-list, trade-list, event-log, heatmap-element {
                     border: 1px solid black;
                 }
 
+                .square-aspect {
+                    height: 0;
+                    width: 100%;
+                    padding-top: 100%;
+                    position: relative;
+                }
                 heatmap-element {
-                    height: 400px;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
                 }
             </style>
 
@@ -90,57 +108,45 @@ class SingleAssetTextInterface extends PolymerElement {
                 on-error="_handle_error"
             ></trader-state>
 
-            <div class="container" id="main-container">
-                <div>
-                    <h3>Bids</h3>
-                    <order-list
-                        class="flex-fill"
-                        orders="[[bids]]"
-                        on-order-canceled="_order_canceled"
-                        on-order-accepted="_order_accepted"
-                    ></order-list>
-                </div>
-                <div>
-                    <h3>Trades</h3>
-                    <trade-list
-                        class="flex-fill"
-                        trades="[[trades]]"
-                    ></trade-list>
-                </div>
-                <div>
-                    <h3>Asks</h3>
-                    <order-list
-                        class="flex-fill"
-                        orders="[[asks]]"
-                        on-order-canceled="_order_canceled"
-                        on-order-accepted="_order_accepted"
-                    ></order-list>
-                </div>
-                <div>
-                    <order-enter-widget
-                        class="flex-fill"
-                        settled-assets="{{settledAssets}}"
-                        available-assets="{{availableAssets}}"
-                        settled-cash="{{settledCash}}"
-                        available-cash="{{availableCash}}"
-                        on-order-entered="_order_entered"
-                    ></order-enter-widget>
-                </div>
-            </div>
-            <div class="container" id="log-container">
-                <div>
-                    <event-log
-                        class="flex-fill"
-                        id="log"
-                        max-entries=100
-                    ></event-log>
+            <div class="full-width">
+                <div class="container" id="main-container">
+                    <div class="list-cell">
+                        <h3>Bids</h3>
+                        <order-list
+                            class="flex-fill"
+                            orders="[[bids]]"
+                            on-order-canceled="_order_canceled"
+                            on-order-accepted="_order_accepted"
+                        ></order-list>
+                    </div>
+                    <div class="list-cell">
+                        <h3>Trades</h3>
+                        <trade-list
+                            class="flex-fill"
+                            trades="[[trades]]"
+                        ></trade-list>
+                    </div>
+                    <div class="list-cell">
+                        <h3>Asks</h3>
+                        <order-list
+                            class="flex-fill"
+                            orders="[[asks]]"
+                            on-order-canceled="_order_canceled"
+                            on-order-accepted="_order_accepted"
+                        ></order-list>
+                    </div>
+                    <div class="heatmap-cell">
+                        <div class="square-aspect">
+                            <heatmap-element
+                                x-bounds="[0, 10]"
+                                y-bounds="[0, 10]"
+                                max-utility="1000"
+                            ></heatmap-element>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <heatmap-element
-                x-bounds="[1, 6]"
-                y-bounds="[0, 5]"
-                max-utility="200"
-            ></heatmap-element>
+            
         `;
     }
 

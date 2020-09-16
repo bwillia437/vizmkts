@@ -26,10 +26,6 @@ const clamp = (value, min, max) => {
     return Math.min(Math.max(value, min), max);
 }
 
-const in_bounds = (x, y, width, height) => {
-    return x > 0 || x < width || y > 0 || y < height;
-}
-
 /**
  * `heatmap-element`
  * heatmap for oTree Visual Markets
@@ -49,7 +45,6 @@ class HeatmapElement extends PolymerElement {
                     position: relative;
                     width: 100%;
                     height: 100%;
-                    border: 1px solid black;
                 }
                 #container > canvas {
                     position: absolute;
@@ -78,7 +73,7 @@ class HeatmapElement extends PolymerElement {
             utilityFunction: {
                 type: Object,
                 value: function () {
-                    return (x, y) => x ** 2 + y ** 3
+                    return (x, y) => 100 * x ** 0.5 * y ** 0.5;
                 }
             },
             xBounds: Array,
@@ -86,9 +81,11 @@ class HeatmapElement extends PolymerElement {
             currentX: Number,
             currentY: Number,
             maxUtility: Number,
+            // the size in pixels of the grid that the indifference curves are evaluated over
+            // a larger value is faster but results in blockier curves
             _quadTreeGridSize: {
                 type: Number,
-                value: 2,
+                value: 10,
             },
             _quadTree: {
                 type: Object,
@@ -104,20 +101,31 @@ class HeatmapElement extends PolymerElement {
         ]
     }
 
-    connectedCallback() {
-        super.connectedCallback();
+    ready() {
+        super.ready();
+        const resizeObserver = new ResizeObserver(entries => {
+            entries.forEach(e => {
+                const width = Math.floor(e.contentRect.width);
+                const height = Math.floor(e.contentRect.height);
+                this.setSize(width, height);
+            });
+        });
+        resizeObserver.observe(this.$.container);
+    }
+
+    setSize(width, height) {
         // we have to update this.width and this.height after waiting, since for some reason updating the canvas' widths and heights
         // doesn't happen until the next tick. changing this.width and this.height after waiting ensures that the canvases have correct
         // width and height properties when the polymer observers are triggered
-        const width = this.$.container.clientWidth;
-        const height = this.$.container.clientHeight;
         for (const canvas of this.$.container.querySelectorAll('canvas')) {
             canvas.width = width;
             canvas.height = height;
         }
         setTimeout(() => {
-            this.width = width;
-            this.height = height;
+            this.setProperties({
+                width: width,
+                height: height,
+            });
         });
     }
 
@@ -131,6 +139,7 @@ class HeatmapElement extends PolymerElement {
      * @param {Number} height The height of the canvas
      */
     drawIndifferenceCurve(utility, canvas, quadTree) {
+        console.log(utility);
         const ctx = canvas.getContext('2d');
         const gridSize = this._quadTreeGridSize;
         // clear canvas
@@ -161,7 +170,7 @@ class HeatmapElement extends PolymerElement {
      */
     hover(e) {
         const now = performance.now();
-        const throttle_rate = 50;
+        const throttle_rate = 10;
         const updateMouse = () => {
             const boundingRect = this.$.container.getBoundingClientRect();
             this.mouseX = e.clientX - boundingRect.left;

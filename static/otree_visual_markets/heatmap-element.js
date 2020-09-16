@@ -102,11 +102,10 @@ class HeatmapElement extends PolymerElement {
     ready() {
         super.ready();
         const resizeObserver = new ResizeObserver(entries => {
-            entries.forEach(e => {
-                const width = Math.floor(e.contentRect.width);
-                const height = Math.floor(e.contentRect.height);
-                this.setSize(width, height);
-            });
+            const containerChange = entries[0];
+            const width = Math.floor(containerChange.contentRect.width);
+            const height = Math.floor(containerChange.contentRect.height);
+            this.setSize(width, height);
         });
         resizeObserver.observe(this.$.container);
     }
@@ -159,7 +158,10 @@ class HeatmapElement extends PolymerElement {
     }
 
     /**
-     * Update mouseX and mouseY variables
+     * Update mouseX and mouseY variables. These variables are in 'screen coordinates', so their values
+     * are in pixels and should be between 0 and width/height. Sometimes they'll be outside those bounds though
+     * due to some weirdness with how mouseover works.
+     * 
      * Throttle rate of update so hover curve update doesn't get called too frequently.
      * Not sure throttling is really required since curves are drawn pretty quickly, but it's
      * probably a good idea anyways.
@@ -194,7 +196,8 @@ class HeatmapElement extends PolymerElement {
 
         const ctx = this.$.hover_curve_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
-        if (mouseX === null || mouseY === null) {
+        // if mouse coordinates aren't defined, or are outside the screen bounds, just return after clearing the hover canvas
+        if (mouseX === null || mouseY === null || mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
             return;
         }
 
@@ -210,7 +213,7 @@ class HeatmapElement extends PolymerElement {
 
         const ctx = this.$.current_bundle_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
-        if (currentX === null || currentY === null) {
+        if (currentX < xBounds[0] || currentX > xBounds[1] || currentY < yBounds[0] || currentY > yBounds[1]) {
             return;
         }
 
@@ -289,8 +292,11 @@ class HeatmapElement extends PolymerElement {
         for (let row = -gridSize; row < height+2*gridSize; row += gridSize) {
             data.push([]);
             for (let col = -gridSize; col < width+2*gridSize; col += gridSize) {
-                const x = remap(col, 0, width,  xBounds[0], xBounds[1]);
-                const y = remap(row, 0, height, yBounds[1], yBounds[0]);
+                let x = remap(col, 0, width,  xBounds[0], xBounds[1]);
+                x = clamp(x , xBounds[0], xBounds[1]);
+                let y = remap(row, 0, height, yBounds[1], yBounds[0])
+                y = clamp(y, yBounds[0], yBounds[1]);
+
                 const utility = utilityFunction(x, y);
                 data[data.length-1].push(utility);
             }

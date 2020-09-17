@@ -74,14 +74,8 @@ class HeatmapElement extends PolymerElement {
             utilityFunction: {
                 type: Object,
             },
-            proposedX: {
-                type: Number,
-                notify: true,
-            },
-            proposedY: {
-                type: Number,
-                notify: true,
-            },
+            proposedX: Number,
+            proposedY: Number,
             xBounds: Array,
             yBounds: Array,
             currentX: Number,
@@ -201,7 +195,7 @@ class HeatmapElement extends PolymerElement {
     }
 
     click(e) {
-        const requiredProperties = [this.xBounds, this.yBounds, this.currentX, this.currentY, this.width, this.height];
+        const requiredProperties = [this.xBounds, this.yBounds, this.width, this.height];
         if (requiredProperties.some(e => typeof e === 'undefined')) return;
 
         const boundingRect = this.$.container.getBoundingClientRect();
@@ -210,16 +204,16 @@ class HeatmapElement extends PolymerElement {
 
         let x =  remap(screenX, 0, this.width, this.xBounds[0], this.xBounds[1]);
         x = clamp(Math.round(x), this.xBounds[0], this.xBounds[1]);
-        let y =  remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
+        let y = remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
         y = clamp(Math.round(y), this.yBounds[0], this.yBounds[1]);
 
-        if ((x < this.currentX && y < this.currentY) || (x > this.currentX && y > this.currentY))
-            return;
+        // let y = remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
+        // y = Math.round(y);
+        // const xDist = x - this.currentX;
+        // y = this.currentY + xDist * Math.round((y - this.currentY) / xDist)
+        // y = clamp(y, this.yBounds[0], this.yBounds[1]);
 
-        this.setProperties({
-            proposedX: x,
-            proposedY: y,
-        });
+        this.dispatchEvent(new CustomEvent('heatmap-click', {detail: {x: x, y: y}, bubbles: true, composed: true}));
     }
 
     drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {

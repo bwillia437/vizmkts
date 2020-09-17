@@ -21,6 +21,8 @@ class VisualMarkets extends PolymerElement {
             availableX: Number,
             settledY: Number,
             availableY: Number,
+            proposedX: Number,
+            proposedY: Number,
         };
     }
 
@@ -96,9 +98,6 @@ class VisualMarkets extends PolymerElement {
                 available-assets="{{availableX}}"
                 settled-cash="{{settledY}}"
                 available-cash="{{availableY}}"
-                on-confirm-trade="_confirm_trade"
-                on-confirm-cancel="_confirm_cancel"
-                on-error="_handle_error"
             ></trader-state>
 
             <div class="full-width">
@@ -112,13 +111,15 @@ class VisualMarkets extends PolymerElement {
                             on-order-accepted="_order_accepted"
                         ></order-list>
                         <div>
-                            <div>
-                                <label for="bid_price_input">Price</label>
-                                <input id="bid_price_input" type="number" min="0">
-                            </div>
-                            <div>
-                                <label for="bid_volume_input">Volume</label>
-                                <input id="bid_volume_input" type="number" min="1">
+                            <div on-input="_updateProposedBundleBid">
+                                <div>
+                                    <label for="bid_price_input">Price</label>
+                                    <input id="bid_price_input" type="number" min="0">
+                                </div>
+                                <div>
+                                    <label for="bid_volume_input">Volume</label>
+                                    <input id="bid_volume_input" type="number" min="1">
+                                </div>
                             </div>
                             <div>
                                 <button type="button" on-click="_enter_bid">Enter Bid</button>
@@ -141,13 +142,15 @@ class VisualMarkets extends PolymerElement {
                             on-order-accepted="_order_accepted"
                         ></order-list>
                         <div>
-                            <div>
-                                <label for="ask_price_input">Price</label>
-                                <input id="ask_price_input" type="number" min="0">
-                            </div>
-                            <div>
-                                <label for="ask_volume_input">Volume</label>
-                                <input id="ask_volume_input" type="number" min="1">
+                            <div on-input="_updateProposedBundleAsk">
+                                <div>
+                                    <label for="ask_price_input">Price</label>
+                                    <input id="ask_price_input" type="number" min="0">
+                                </div>
+                                <div>
+                                    <label for="ask_volume_input">Volume</label>
+                                    <input id="ask_volume_input" type="number" min="1">
+                                </div>
                             </div>
                             <div>
                                 <button type="button" on-click="_enter_ask">Enter Ask</button>
@@ -159,10 +162,13 @@ class VisualMarkets extends PolymerElement {
                             <heatmap-element
                                 id="heatmap"
                                 x-bounds="[0, 100]"
-                                y-bounds="[0, 100]"
+                                y-bounds="[0, 10000]"
                                 current-x="[[ settledX ]]"
                                 current-y="[[ settledY ]]"
-                                max-utility="100"
+                                max-utility="1000"
+                                proposed-x="[[ proposedX ]]"
+                                proposed-y="[[ proposedY ]]"
+                                on-heatmap-click="onHeatmapClick"
                             ></heatmap-element>
                         </div>
                     </div>
@@ -174,7 +180,6 @@ class VisualMarkets extends PolymerElement {
                     <span>Available Y: [[availableY]]</span>
                 </div>
             </div>
-            
         `;
     }
 
@@ -184,16 +189,79 @@ class VisualMarkets extends PolymerElement {
         this.$.heatmap.utilityFunction = (x, y) => x ** 0.5 * y ** 0.5;
     }
 
+    onHeatmapClick(e) {
+        // this takes some explanation..
+        // we need it to be actually possible to move from the current bundle to the proposed one.
+        // the restriction is that order prices and volumes have to be integers.
+        // so when we calculate the proposed Y, we actually calculate the nearest Y to the click
+        // which is an integer multiple of the difference in X between the current X and the proposed X.
+        const proposedX = e.detail.x;
+        const xDist = proposedX - this.settledX;
+        const proposedY = this.settledY + xDist * Math.round((e.detail.y - this.settledY) / xDist);
+
+        if ((proposedX > this.settledX && proposedY > this.settledY) || (proposedX < this.settledX && proposedY < this.settledY))
+            return;
+
+        this.setProperties({
+            proposedX: proposedX,
+            proposedY: proposedY,
+        });
+
+        // calculate the required trade to move from the current bundle to the proposed one
+        if (proposedX > this.settledX) {
+            const volume = proposedX - this.settledX;
+            const price = Math.round((this.settledY - proposedY) / volume);
+            this.$.bid_volume_input.value = volume;
+            this.$.bid_price_input.value = price;
+            
+            this.$.ask_volume_input.value = '';
+            this.$.ask_price_input.value = '';
+        }
+        else {
+            const volume = this.settledX - proposedX;
+            const price = Math.round((proposedY - this.settledY) / volume);
+            this.$.ask_volume_input.value = volume;
+            this.$.ask_price_input.value = price;
+
+            this.$.bid_volume_input.value = '';
+            this.$.bid_price_input.value = '';
+        }
+    }
+
+    _updateProposedBundleBid() {
+        const price = parseInt(this.$.bid_price_input.value);
+        const volume = parseInt(this.$.bid_volume_input.value);
+        if (isNaN(price) || isNaN(volume))
+            return;
+        
+        this.setProperties({
+            proposedX: this.settledX + volume,
+            proposedY: this.settledY - price * volume,
+        });
+    }
+
+    _updateProposedBundleAsk() {
+        const price = parseInt(this.$.ask_price_input.value);
+        const volume = parseInt(this.$.ask_volume_input.value);
+        if (isNaN(price) || isNaN(volume))
+            return;
+        
+        this.setProperties({
+            proposedX: this.settledX - volume,
+            proposedY: this.settledY + price * volume,
+        });
+    }
+
     _enter_bid() {
         const price = parseInt(this.$.bid_price_input.value);
         if (isNaN(price)) {
-            this.$.log.error('Can\'t enter bid: invalid price');
+            // this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
         const volume = parseInt(this.$.bid_volume_input.value);
         if (isNaN(volume)) {
-            this.$.log.error('Can\'t enter bid: invalid volume');
+            // this.$.log.error('Can\'t enter bid: invalid volume');
             return;
         }
 
@@ -203,27 +271,17 @@ class VisualMarkets extends PolymerElement {
     _enter_ask() {
         const price = parseInt(this.$.ask_price_input.value);
         if (isNaN(price)) {
-            this.$.log.error('Can\'t enter ask: invalid price');
+            // this.$.log.error('Can\'t enter ask: invalid price');
             return;
         }
 
         const volume = parseInt(this.$.ask_volume_input.value);
         if (isNaN(volume)) {
-            this.$.log.error('Can\'t enter ask: invalid volume');
+            // this.$.log.error('Can\'t enter ask: invalid volume');
             return;
         }
 
         this.$.trader_state.enter_order(price, volume, false);
-    }
-
-    // triggered when this player enters an order
-    _order_entered(event) {
-        const order = event.detail;
-        if (isNaN(order.price) || isNaN(order.volume)) {
-            this.$.log.error('Invalid order entered');
-            return;
-        }
-        this.$.trader_state.enter_order(order.price, order.volume, order.is_bid);
     }
 
     // triggered when this player cancels an order
@@ -254,30 +312,6 @@ class VisualMarkets extends PolymerElement {
             this.$.trader_state.accept_order(order);
         };
         this.$.modal.show();
-    }
-
-    // react to the backend confirming that a trade occurred
-    _confirm_trade(event) {
-        const trade = event.detail;
-        const all_orders = trade.making_orders.concat([trade.taking_order]);
-        for (let order of all_orders) {
-            if (order.pcode == this.pcode)
-                this.$.log.info(`You ${order.is_bid ? 'bought' : 'sold'} ${order.traded_volume} ${order.traded_volume == 1 ? 'unit' : 'units'}`);
-        }
-    }
-
-    // react to the backend confirming that an order was canceled
-    _confirm_cancel(event) {
-        const order = event.detail;
-        if (order.pcode == this.pcode) {
-            this.$.log.info(`You canceled your ${msg.is_bid ? 'bid' : 'ask'}`);
-        }
-    }
-
-    // handle an error sent from the backend
-    _handle_error(event) {
-        let message = event.detail;
-        this.$.log.error(message)
     }
 }
 

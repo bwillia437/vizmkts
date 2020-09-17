@@ -207,13 +207,11 @@ class HeatmapElement extends PolymerElement {
         let y = remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
         y = clamp(Math.round(y), this.yBounds[0], this.yBounds[1]);
 
-        // let y = remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
-        // y = Math.round(y);
-        // const xDist = x - this.currentX;
-        // y = this.currentY + xDist * Math.round((y - this.currentY) / xDist)
-        // y = clamp(y, this.yBounds[0], this.yBounds[1]);
-
-        this.dispatchEvent(new CustomEvent('heatmap-click', {detail: {x: x, y: y}, bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('heatmap-click', {
+            detail: {x: x, y: y},
+            bubbles: true,
+            composed: true
+        }));
     }
 
     drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
@@ -260,7 +258,7 @@ class HeatmapElement extends PolymerElement {
         ctx.beginPath()
         ctx.rect(screenX, 0, width-screenX, screenY);
         ctx.rect(0, screenY, screenX, height-screenY);
-        ctx.fillStyle = 'rgba(1, 1, 1, 0.2)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         ctx.fill();
 
         // draw circle centered at current bundle
@@ -276,6 +274,9 @@ class HeatmapElement extends PolymerElement {
 
         const ctx = this.$.proposed_bundle_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
+
+        if (proposedX === null || proposedX === null)
+            return;
 
         const screenX = remap(proposedX, xBounds[0], xBounds[1], 0, width);
         const screenY = remap(proposedY, yBounds[1], yBounds[0], 0, height);

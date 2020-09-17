@@ -70,7 +70,7 @@ class VisualMarkets extends PolymerElement {
                     padding-top: 100%;
                     position: relative;
                 }
-                heatmap-element {
+                .square-aspect > * {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -196,8 +196,13 @@ class VisualMarkets extends PolymerElement {
         // so when we calculate the proposed Y, we actually calculate the nearest Y to the click
         // which is an integer multiple of the difference in X between the current X and the proposed X.
         const proposedX = e.detail.x;
+        if (proposedX == this.settledX)
+            return;
+
         const xDist = proposedX - this.settledX;
         const proposedY = this.settledY + xDist * Math.round((e.detail.y - this.settledY) / xDist);
+        if (proposedY == this.settledY)
+            return;
 
         if ((proposedX > this.settledX && proposedY > this.settledY) || (proposedX < this.settledX && proposedY < this.settledY))
             return;
@@ -231,8 +236,13 @@ class VisualMarkets extends PolymerElement {
     _updateProposedBundleBid() {
         const price = parseInt(this.$.bid_price_input.value);
         const volume = parseInt(this.$.bid_volume_input.value);
-        if (isNaN(price) || isNaN(volume))
+        if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
+            this.setProperties({
+                proposedX: null,
+                proposedY: null,
+            })
             return;
+        }
         
         this.setProperties({
             proposedX: this.settledX + volume,
@@ -243,8 +253,13 @@ class VisualMarkets extends PolymerElement {
     _updateProposedBundleAsk() {
         const price = parseInt(this.$.ask_price_input.value);
         const volume = parseInt(this.$.ask_volume_input.value);
-        if (isNaN(price) || isNaN(volume))
+        if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
+            this.setProperties({
+                proposedX: null,
+                proposedY: null,
+            })
             return;
+        }
         
         this.setProperties({
             proposedX: this.settledX - volume,
@@ -254,13 +269,13 @@ class VisualMarkets extends PolymerElement {
 
     _enter_bid() {
         const price = parseInt(this.$.bid_price_input.value);
-        if (isNaN(price)) {
+        if (isNaN(price) || price < 0) {
             // this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
         const volume = parseInt(this.$.bid_volume_input.value);
-        if (isNaN(volume)) {
+        if (isNaN(volume) || volume < 0) {
             // this.$.log.error('Can\'t enter bid: invalid volume');
             return;
         }
@@ -270,13 +285,13 @@ class VisualMarkets extends PolymerElement {
 
     _enter_ask() {
         const price = parseInt(this.$.ask_price_input.value);
-        if (isNaN(price)) {
+        if (isNaN(price) || price < 0) {
             // this.$.log.error('Can\'t enter ask: invalid price');
             return;
         }
 
         const volume = parseInt(this.$.ask_volume_input.value);
-        if (isNaN(volume)) {
+        if (isNaN(volume) || volume < 0) {
             // this.$.log.error('Can\'t enter ask: invalid volume');
             return;
         }

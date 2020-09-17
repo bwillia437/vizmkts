@@ -8,13 +8,7 @@ import '/static/otree_markets/trade_list.js';
 import '/static/otree_markets/simple_modal.js';
 import '/static/otree_markets/event_log.js';
 
-import './order_enter_widget.js';
 import './heatmap-element.js';
-
-/*
-    this component is a single-asset market, implemented using otree_markets' trader_state component and some of
-    otree_markets' reusable UI widgets.
-*/
 
 class VisualMarkets extends PolymerElement {
 
@@ -41,25 +35,20 @@ class VisualMarkets extends PolymerElement {
                     margin-left: 50%;
                     transform: translateX(-50%);
                 }
-
-                .container {
-                    display: flex;
-                    justify-content: space-evenly;
-                }
-                .container > div {
-                    display: flex;
-                    flex-direction: column;
-                }
                 .flex-fill {
                     flex: 1 0 0;
                     min-height: 0;
                 }
 
-                #main-container {
+                .main-container {
+                    display: flex;
+                    justify-content: space-evenly;
                     padding: 10px;
                 }
-                #main-container > div {
+                .main-container > div {
                     margin: 5px;
+                    display: flex;
+                    flex-direction: column;
                 }
                 .list-cell {
                     flex: 0 1 15%;
@@ -86,6 +75,10 @@ class VisualMarkets extends PolymerElement {
                     width: 100%;
                     height: 100%;
                 }
+
+                .info-table {
+                    text-align: center;
+                }
             </style>
 
             <simple-modal
@@ -109,7 +102,7 @@ class VisualMarkets extends PolymerElement {
             ></trader-state>
 
             <div class="full-width">
-                <div class="container" id="main-container">
+                <div class="main-container">
                     <div class="list-cell">
                         <h3>Bids</h3>
                         <order-list
@@ -118,6 +111,19 @@ class VisualMarkets extends PolymerElement {
                             on-order-canceled="_order_canceled"
                             on-order-accepted="_order_accepted"
                         ></order-list>
+                        <div>
+                            <div>
+                                <label for="bid_price_input">Price</label>
+                                <input id="bid_price_input" type="number" min="0">
+                            </div>
+                            <div>
+                                <label for="bid_volume_input">Volume</label>
+                                <input id="bid_volume_input" type="number" min="1">
+                            </div>
+                            <div>
+                                <button type="button" on-click="_enter_bid">Enter Bid</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="list-cell">
                         <h3>Trades</h3>
@@ -134,6 +140,19 @@ class VisualMarkets extends PolymerElement {
                             on-order-canceled="_order_canceled"
                             on-order-accepted="_order_accepted"
                         ></order-list>
+                        <div>
+                            <div>
+                                <label for="ask_price_input">Price</label>
+                                <input id="ask_price_input" type="number" min="0">
+                            </div>
+                            <div>
+                                <label for="ask_volume_input">Volume</label>
+                                <input id="ask_volume_input" type="number" min="1">
+                            </div>
+                            <div>
+                                <button type="button" on-click="_enter_ask">Enter Ask</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="heatmap-cell">
                         <div class="square-aspect">
@@ -148,6 +167,12 @@ class VisualMarkets extends PolymerElement {
                         </div>
                     </div>
                 </div>
+                <div class="info-table">
+                    <span>Settled X: [[settledX]]</span>
+                    <span>Available X: [[availableX]]</span>
+                    <span>Settled Y: [[settledY]]</span>
+                    <span>Available Y: [[availableY]]</span>
+                </div>
             </div>
             
         `;
@@ -157,6 +182,38 @@ class VisualMarkets extends PolymerElement {
         super.ready();
         this.pcode = this.$.constants.participantCode;
         this.$.heatmap.utilityFunction = (x, y) => 100 * x ** 0.5 * y ** 0.5;
+    }
+
+    _enter_bid() {
+        const price = parseInt(this.$.bid_price_input.value);
+        if (isNaN(price)) {
+            this.$.log.error('Can\'t enter bid: invalid price');
+            return;
+        }
+
+        const volume = parseInt(this.$.bid_volume_input.value);
+        if (isNaN(volume)) {
+            this.$.log.error('Can\'t enter bid: invalid volume');
+            return;
+        }
+
+        this.$.trader_state.enter_order(price, volume, true);
+    }
+
+    _enter_ask() {
+        const price = parseInt(this.$.ask_price_input.value);
+        if (isNaN(price)) {
+            this.$.log.error('Can\'t enter ask: invalid price');
+            return;
+        }
+
+        const volume = parseInt(this.$.ask_volume_input.value);
+        if (isNaN(volume)) {
+            this.$.log.error('Can\'t enter ask: invalid volume');
+            return;
+        }
+
+        this.$.trader_state.enter_order(price, volume, false);
     }
 
     // triggered when this player enters an order

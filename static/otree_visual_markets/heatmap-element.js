@@ -232,8 +232,8 @@ class HeatmapElement extends PolymerElement {
 
         // draw greyed-out squares for impossible trades
         ctx.beginPath()
-        ctx.rect(screenX, 0, width-screenX, height-screenY);
-        ctx.rect(0, screenY, screenX, screenY);
+        ctx.rect(screenX, 0, width-screenX, screenY);
+        ctx.rect(0, screenY, screenX, height-screenY);
         ctx.fillStyle = 'rgba(1, 1, 1, 0.2)';
         ctx.fill();
 

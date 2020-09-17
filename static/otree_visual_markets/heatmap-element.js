@@ -53,10 +53,11 @@ class HeatmapElement extends PolymerElement {
                 }
             </style>
             
-            <div id="container" on-mousemove="hover" on-mouseout="mouseout">
+            <div id="container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">
                 <canvas id="heatmap_canvas"></canvas>
                 <canvas id="hover_curve_canvas"></canvas>
                 <canvas id="current_bundle_canvas"></canvas>
+                <canvas id="proposed_bundle_canvas"></canvas>
             </div>
         `;
     }
@@ -72,6 +73,14 @@ class HeatmapElement extends PolymerElement {
             },
             utilityFunction: {
                 type: Object,
+            },
+            proposedX: {
+                type: Number,
+                notify: true,
+            },
+            proposedY: {
+                type: Number,
+                notify: true,
             },
             xBounds: Array,
             yBounds: Array,
@@ -96,6 +105,7 @@ class HeatmapElement extends PolymerElement {
             'drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height)',
             'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
+            'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
         ]
     }
 
@@ -190,6 +200,28 @@ class HeatmapElement extends PolymerElement {
         this.mouseY = null;
     }
 
+    click(e) {
+        const requiredProperties = [this.xBounds, this.yBounds, this.currentX, this.currentY, this.width, this.height];
+        if (requiredProperties.some(e => typeof e === 'undefined')) return;
+
+        const boundingRect = this.$.container.getBoundingClientRect();
+        const screenX = e.clientX - boundingRect.left;
+        const screenY = e.clientY - boundingRect.top;
+
+        let x =  remap(screenX, 0, this.width, this.xBounds[0], this.xBounds[1]);
+        x = clamp(Math.round(x), this.xBounds[0], this.xBounds[1]);
+        let y =  remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
+        y = clamp(Math.round(y), this.yBounds[0], this.yBounds[1]);
+
+        if ((x < this.currentX && y < this.currentY) || (x > this.currentX && y > this.currentY))
+            return;
+
+        this.setProperties({
+            proposedX: x,
+            proposedY: y,
+        });
+    }
+
     drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
@@ -241,6 +273,22 @@ class HeatmapElement extends PolymerElement {
         ctx.beginPath();
         ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
         ctx.fillStyle = 'yellow';
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height) {
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const ctx = this.$.proposed_bundle_canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+
+        const screenX = remap(proposedX, xBounds[0], xBounds[1], 0, width);
+        const screenY = remap(proposedY, yBounds[1], yBounds[0], 0, height);
+
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+        ctx.fillStyle = 'orange';
         ctx.fill();
         ctx.stroke();
     }

@@ -158,11 +158,11 @@ class VisualMarkets extends PolymerElement {
                         <div class="square-aspect">
                             <heatmap-element
                                 id="heatmap"
-                                x-bounds="[0, 10]"
-                                y-bounds="[0, 10]"
+                                x-bounds="[0, 100]"
+                                y-bounds="[0, 100]"
                                 current-x="[[ settledX ]]"
                                 current-y="[[ settledY ]]"
-                                max-utility="1000"
+                                max-utility="100"
                             ></heatmap-element>
                         </div>
                     </div>
@@ -181,7 +181,7 @@ class VisualMarkets extends PolymerElement {
     ready() {
         super.ready();
         this.pcode = this.$.constants.participantCode;
-        this.$.heatmap.utilityFunction = (x, y) => 100 * x ** 0.5 * y ** 0.5;
+        this.$.heatmap.utilityFunction = (x, y) => x ** 0.5 * y ** 0.5;
     }
 
     _enter_bid() {

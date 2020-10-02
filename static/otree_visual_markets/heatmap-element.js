@@ -54,6 +54,7 @@ class HeatmapElement extends PolymerElement {
             </style>
             
             <div id="container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">
+                <!-- use stacked canvases as 'layers' so we can clear different elements individually -->
                 <canvas id="heatmap_canvas"></canvas>
                 <canvas id="hover_curve_canvas"></canvas>
                 <canvas id="current_bundle_canvas"></canvas>
@@ -136,10 +137,8 @@ class HeatmapElement extends PolymerElement {
      * @param {Number} utility The utility value this indifference curve goes through
      * @param {CanvasRenderingContext2D} ctx A rendering context which is to be used to draw the curve
      * @param {MarchingSquaresJS.QuadTree} quadTree A quadtree object containing the utility data
-     * @param {Number} width The width of the canvas
-     * @param {Number} height The height of the canvas
      */
-    drawIndifferenceCurve(utility, ctx, quadTree, width, height) {
+    drawIndifferenceCurve(utility, ctx, quadTree) {
         ctx.save();
         const gridSize = this._quadTreeGridSize;
         const paths = MarchingSquaresJS.isoLines(quadTree, utility, {noFrame: true});
@@ -174,6 +173,8 @@ class HeatmapElement extends PolymerElement {
      */
     hover(e) {
         const now = performance.now();
+        // throttle rate in ms
+        // this value is the minimum amount of time between mouse updates
         const throttle_rate = 10;
         const updateMouse = () => {
             const boundingRect = this.$.container.getBoundingClientRect();
@@ -221,19 +222,20 @@ class HeatmapElement extends PolymerElement {
         const ctx = this.$.hover_curve_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
         // if mouse coordinates aren't defined, or are outside the screen bounds, just return after clearing the hover canvas
-        if (mouseX === null || mouseY === null ||mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
+        if (mouseX === null || mouseY === null || mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
             return;
         }
 
         const x = remap(mouseX, 0, width, xBounds[0], xBounds[1]);
         const y = remap(mouseY, 0, height, yBounds[1], yBounds[0]);
 
+        // if mouse position is in one of the 'impossible' quadrants, just return
         if ((x < currentX && y < currentY) || (x > this.currentX && y > this.currentY)) {
             return;
         }
 
         const utility = utilityFunction(x, y);
-        this.drawIndifferenceCurve(utility, ctx, quadTree, width, height);
+        this.drawIndifferenceCurve(utility, ctx, quadTree);
     }
 
     drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
@@ -248,7 +250,7 @@ class HeatmapElement extends PolymerElement {
 
         // draw indifference curve for current bundle
         const utility = utilityFunction(currentX, currentY);
-        this.drawIndifferenceCurve(utility, ctx, quadTree, width, height);
+        this.drawIndifferenceCurve(utility, ctx, quadTree);
 
         // the current bundle in screen coordinates
         const screenX = remap(currentX, xBounds[0], xBounds[1], 0, width);
@@ -348,7 +350,7 @@ class HeatmapElement extends PolymerElement {
             data.push([]);
             for (let col = -gridSize; col < width+2*gridSize; col += gridSize) {
                 let x = remap(col, 0, width,  xBounds[0], xBounds[1]);
-                x = clamp(x , xBounds[0], xBounds[1]);
+                x = clamp(x, xBounds[0], xBounds[1]);
                 let y = remap(row, 0, height, yBounds[1], yBounds[0])
                 y = clamp(y, yBounds[0], yBounds[1]);
 

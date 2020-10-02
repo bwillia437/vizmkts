@@ -64,6 +64,7 @@ class VisualMarkets extends PolymerElement {
                     border: 1px solid black;
                 }
 
+                /* these css rules make an element square, based on its width */
                 .square-aspect {
                     height: 0;
                     width: 100%;
@@ -204,6 +205,7 @@ class VisualMarkets extends PolymerElement {
         if (proposedY == this.settledY)
             return;
 
+        // if the calculated proposed bundle is in either of the 'impossible' quadrants, just return
         if ((proposedX > this.settledX && proposedY > this.settledY) || (proposedX < this.settledX && proposedY < this.settledY))
             return;
 
@@ -319,7 +321,7 @@ class VisualMarkets extends PolymerElement {
         if (order.pcode == this.pcode)
             return;
 
-        this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'buy' : 'sell'} for $${order.price}?`
+        this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${order.volume} units for $${order.price}?`
         this.$.modal.on_close_callback = (accepted) => {
             if (!accepted)
                 return;

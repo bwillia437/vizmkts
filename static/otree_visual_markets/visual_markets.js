@@ -8,7 +8,7 @@ import '/static/otree_markets/trade_list.js';
 import '/static/otree_markets/simple_modal.js';
 import '/static/otree_markets/event_log.js';
 
-import './heatmap-element.js';
+import './heatmap_element.js';
 
 class VisualMarkets extends PolymerElement {
 

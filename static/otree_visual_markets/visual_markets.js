@@ -14,6 +14,14 @@ class VisualMarkets extends PolymerElement {
 
     static get properties() {
         return {
+            utilityFunctionString: String,
+            utilityFunction: {
+                type: Object,
+                computed: 'computeUtilityFunction(utilityFunctionString)',
+            },
+            maxUtility: Number,
+            xBounds: Array,
+            yBounds: Array,
             bids: Array,
             asks: Array,
             trades: Array,
@@ -162,11 +170,12 @@ class VisualMarkets extends PolymerElement {
                         <div class="square-aspect">
                             <heatmap-element
                                 id="heatmap"
-                                x-bounds="[0, 100]"
-                                y-bounds="[0, 10000]"
+                                utility-function="[[ utilityFunction ]]"
+                                x-bounds="[[ xBounds ]]"
+                                y-bounds="[[ yBounds ]]"
                                 current-x="[[ settledX ]]"
                                 current-y="[[ settledY ]]"
-                                max-utility="1000"
+                                max-utility="[[ maxUtility ]]"
                                 proposed-x="[[ proposedX ]]"
                                 proposed-y="[[ proposedY ]]"
                                 on-heatmap-click="onHeatmapClick"
@@ -187,7 +196,10 @@ class VisualMarkets extends PolymerElement {
     ready() {
         super.ready();
         this.pcode = this.$.constants.participantCode;
-        this.$.heatmap.utilityFunction = (x, y) => x ** 0.5 * y ** 0.5;
+    }
+    
+    computeUtilityFunction(utilityFunctionString) {
+        return new Function('x', 'y', 'return ' + utilityFunctionString);
     }
 
     onHeatmapClick(e) {

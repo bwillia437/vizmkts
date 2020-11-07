@@ -1,0 +1,26 @@
+# sample round config
+# all endowments can be specified either as a single number or a list of endowments, one for each player in each group
+# if an endowment list is shorter than the number of players in the group, endowments wrap back around to the beginning
+
+# number of players in each group or null if there's only one group
+players_per_group: null
+
+# starting x (asset) endowment for each player
+x_endowment: 20
+# scaling for x asset
+x_currency_scale: 10
+# heatmap bounds for x asset
+x_bounds: [0, 100]
+
+# starting y (cash) endowment for each player
+y_endowment: 20
+# scaling for y asset
+y_currency_scale: 1000
+# heatmap bounds for y asset
+y_bounds: [0, 100]
+
+utility_function: "(x ** 0.5) * (y ** 0.5)"
+max_utility: 100
+
+# the length of the round in seconds
+period_length: 120

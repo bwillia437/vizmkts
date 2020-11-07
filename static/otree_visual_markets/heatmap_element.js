@@ -40,25 +40,50 @@ class HeatmapElement extends PolymerElement {
             <style>
                 :host {
                     display: block;
+                    --axis-size: 1.5em;
                 }
-                #container {
+                .main_container {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                }
+                .main_container > :last-child {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                }
+                #y_scale {
+                    width: var(--axis-size);
+                    height: calc(100% - var(--axis-size));
+                }
+                #x_scale {
+                    height: var(--axis-size);
+                }
+                #heatmap_container {
+                    flex: 1;
                     position: relative;
                     width: 100%;
                     height: 100%;
                 }
-                #container > canvas {
+                #heatmap_container > canvas {
                     position: absolute;
                     width: 100%;
                     height: 100%;
                 }
             </style>
             
-            <div id="container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">
-                <!-- use stacked canvases as 'layers' so we can clear different elements individually -->
-                <canvas id="heatmap_canvas"></canvas>
-                <canvas id="hover_curve_canvas"></canvas>
-                <canvas id="current_bundle_canvas"></canvas>
-                <canvas id="proposed_bundle_canvas"></canvas>
+            <div class="main_container">
+                <canvas id="y_scale"></canvas>
+                <div>
+                    <div id="heatmap_container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">
+                        <!-- use stacked canvases as 'layers' so we can clear different elements individually -->
+                        <canvas id="heatmap_canvas"></canvas>
+                        <canvas id="hover_curve_canvas"></canvas>
+                        <canvas id="current_bundle_canvas"></canvas>
+                        <canvas id="proposed_bundle_canvas"></canvas>
+                    </div>
+                    <canvas id="x_scale"></canvas>
+                </div>
             </div>
         `;
     }
@@ -101,6 +126,8 @@ class HeatmapElement extends PolymerElement {
             'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
+            'drawXScale(xBounds, width)',
+            'drawYScale(yBounds, height)',
         ]
     }
 
@@ -112,17 +139,24 @@ class HeatmapElement extends PolymerElement {
             const height = Math.floor(containerChange.contentRect.height);
             this.setSize(width, height);
         });
-        resizeObserver.observe(this.$.container);
+        resizeObserver.observe(this.$.heatmap_container);
     }
 
     setSize(width, height) {
         // we have to update this.width and this.height after waiting, since for some reason updating the canvas' widths and heights
         // doesn't happen until the next tick. changing this.width and this.height after waiting ensures that the canvases have correct
         // width and height properties when the polymer observers are triggered
-        for (const canvas of this.$.container.querySelectorAll('canvas')) {
+        for (const canvas of this.$.heatmap_container.querySelectorAll('canvas')) {
             canvas.width = width;
             canvas.height = height;
         }
+
+        // set width and height properties on scale canvases
+        this.$.x_scale.width = width;
+        this.$.x_scale.height = this.$.x_scale.clientHeight;
+        this.$.y_scale.width = this.$.y_scale.clientWidth;
+        this.$.y_scale.height = height;
+
         setTimeout(() => {
             this.setProperties({
                 width: width,
@@ -177,7 +211,7 @@ class HeatmapElement extends PolymerElement {
         // this value is the minimum amount of time between mouse updates
         const throttle_rate = 10;
         const updateMouse = () => {
-            const boundingRect = this.$.container.getBoundingClientRect();
+            const boundingRect = this.$.heatmap_container.getBoundingClientRect();
             this.mouseX = e.clientX - boundingRect.left;
             this.mouseY = e.clientY - boundingRect.top;
             this.last_hover = now;
@@ -199,7 +233,7 @@ class HeatmapElement extends PolymerElement {
         const requiredProperties = [this.xBounds, this.yBounds, this.width, this.height];
         if (requiredProperties.some(e => typeof e === 'undefined')) return;
 
-        const boundingRect = this.$.container.getBoundingClientRect();
+        const boundingRect = this.$.heatmap_container.getBoundingClientRect();
         const screenX = e.clientX - boundingRect.left;
         const screenY = e.clientY - boundingRect.top;
 
@@ -339,6 +373,56 @@ class HeatmapElement extends PolymerElement {
 
         // Display heatmap
         ctx.putImageData(imageData, 0, 0);
+    }
+
+    // get an appropriate tick interval for an x or y axis given the bounds of that axis
+    // intervals are chosen as 1, 2, 5 or a multiple of 10
+    getTickInterval(bounds) {
+        const range = bounds[1] - bounds[0];
+        const maxNumTicks = 12;
+        [1, 2, 5].forEach(interval => {
+            if (range / interval <= maxNumTicks) return interval;
+        });
+        let interval = 10;
+        while (range / interval > maxNumTicks) interval += 10;
+        return interval;
+    }
+
+    drawXScale(xBounds, width) {
+        // if any arguments are undefined, just return
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const height = this.$.x_scale.height;
+
+        const ctx = this.$.x_scale.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(0, 1);
+        ctx.lineTo(width, 1);
+
+        const interval = this.getTickInterval(xBounds);
+        let curTick = xBounds[0];
+        while (curTick <= xBounds[1]) {
+            const curTickPixels = remap(curTick, xBounds[0], xBounds[1], 0, width);
+            ctx.moveTo(curTickPixels, 1);
+            ctx.lineTo(curTickPixels, height/2);
+            ctx.fillText(curTick, curTickPixels + 5, height/2)
+            curTick += interval;
+        }
+
+        ctx.stroke();
+    }
+
+    drawYScale(yBounds, height) {
+        // if any arguments are undefined, just return
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const width = this.$.y_scale.width;
+
+        const ctx = this.$.y_scale.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(width-1, 0);
+        ctx.lineTo(width-1, height);
+        ctx.stroke();
     }
 
     computeQuadTree(gridSize, utilityFunction, xBounds, yBounds, width, height) {

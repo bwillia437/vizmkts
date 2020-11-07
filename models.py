@@ -2,7 +2,8 @@ from otree.api import (
     models, BaseConstants
 )
 from otree_markets import models as markets_models
-from .configmanager import ConfigManager
+from .configmanager import MarketConfig
+import math
 
 
 class Constants(BaseConstants):
@@ -10,22 +11,12 @@ class Constants(BaseConstants):
     players_per_group = None
     num_rounds = 99 
 
-    # the columns of the config CSV and their types
-    # this dict is used by ConfigManager
-    config_fields = {
-        'period_length': int,
-        'asset_endowment': int,
-        'cash_endowment': int,
-        'allow_short': bool,
-    }
-
-
 class Subsession(markets_models.Subsession):
 
     @property
     def config(self):
-        config_addr = Constants.name_in_url + '/configs/' + self.session.config['config_file']
-        return ConfigManager(config_addr, self.round_number, Constants.config_fields)
+        config_name = self.session.config['session_config_file']
+        return MarketConfig.get(config_name, self.round_number)
     
     def allow_short(self):
         return self.config.allow_short
@@ -34,6 +25,13 @@ class Subsession(markets_models.Subsession):
         if self.round_number > self.config.num_rounds:
             return
         return super().creating_session()
+    
+    def utility(self, x, y):
+        return eval(
+            self.config.utility_function,
+            globals=math.__dict__,
+            locals={'x', x, 'y', y}
+        )
 
 
 class Group(markets_models.Group):
@@ -43,7 +41,7 @@ class Group(markets_models.Group):
 class Player(markets_models.Player):
 
     def asset_endowment(self):
-        return self.subsession.config.asset_endowment
+        return self.subsession.config.x_endowment
     
     def cash_endowment(self):
-        return self.subsession.config.cash_endowment
+        return self.subsession.config.y_endowment

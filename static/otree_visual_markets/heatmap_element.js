@@ -40,7 +40,9 @@ class HeatmapElement extends PolymerElement {
             <style>
                 :host {
                     display: block;
+                    /* the width/height of the x and y axes */
                     --axis-size: 1.5em;
+                    /* extra padding on the top/right of the heatmap to leave room for axis labels at extremes */
                     --axis-padding: 2em;
                 }
                 .main_container {
@@ -131,8 +133,8 @@ class HeatmapElement extends PolymerElement {
             'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
-            'drawXScale(xBounds, axisSize, axisPadding)',
-            'drawYScale(xBounds, axisSize, axisPadding)',
+            'drawXAxis(xBounds, axisSize, axisPadding)',
+            'drawYAxis(xBounds, axisSize, axisPadding)',
         ]
     }
 
@@ -398,7 +400,7 @@ class HeatmapElement extends PolymerElement {
         return interval;
     }
 
-    drawXScale(xBounds, axisSize, axisPadding) {
+    drawXAxis(xBounds, axisSize, axisPadding) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
@@ -406,24 +408,25 @@ class HeatmapElement extends PolymerElement {
         const height = this.$.x_scale.height;
 
         const ctx = this.$.x_scale.getContext('2d');
+        ctx.textBaseline = 'top'
         ctx.beginPath();
-        ctx.moveTo(axisSize-1, 1);
+        ctx.moveTo(axisSize, 1);
         ctx.lineTo(width-axisPadding, 1);
 
         const interval = this.getTickInterval(xBounds);
         let curTick = xBounds[0];
         while (curTick <= xBounds[1]) {
-            const curTickPixels = remap(curTick, xBounds[0], xBounds[1], axisSize-1, width-axisPadding);
+            const curTickPixels = remap(curTick, xBounds[0], xBounds[1], axisSize, width-axisPadding);
             ctx.moveTo(curTickPixels, 1);
             ctx.lineTo(curTickPixels, height/2);
-            ctx.fillText(curTick, curTickPixels + 5, height/2)
+            ctx.fillText(curTick, curTickPixels + 5, 5)
             curTick += interval;
         }
 
         ctx.stroke();
     }
 
-    drawYScale(yBounds, axisSize, axisPadding) {
+    drawYAxis(yBounds, axisSize, axisPadding) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
@@ -434,12 +437,12 @@ class HeatmapElement extends PolymerElement {
         ctx.textAlign = 'right';
         ctx.beginPath();
         ctx.moveTo(width-1, axisPadding);
-        ctx.lineTo(width-1, height-axisSize+1);
+        ctx.lineTo(width-1, height-axisSize);
 
         const interval = this.getTickInterval(yBounds);
         let curTick = yBounds[0];
         while (curTick <= yBounds[1]) {
-            const curTickPixels = remap(curTick, yBounds[0], yBounds[1], height-axisSize+1, axisPadding);
+            const curTickPixels = remap(curTick, yBounds[0], yBounds[1], height-axisSize, axisPadding);
             ctx.moveTo(width, curTickPixels);
             ctx.lineTo(width/2, curTickPixels);
             ctx.fillText(curTick, width-5, curTickPixels - 5)

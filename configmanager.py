@@ -58,7 +58,7 @@ class MarketConfig():
 
         if round_config_name not in cls.round_config_cache or cls.round_config_cache[round_config_name].mtime < mtime:
             with open(path) as infile:
-                entry = yaml.load(infile)
+                entry = yaml.safe_load(infile)
             cls.round_config_cache[round_config_name] = CacheEntry(entry=entry, mtime=mtime)
         return cls.round_config_cache[round_config_name].entry
     

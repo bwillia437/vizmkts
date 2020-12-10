@@ -24,3 +24,6 @@ max_utility: 100
 
 # the length of the round in seconds
 period_length: 120
+
+# whether to draw the heatmap
+heatmap_enabled: true

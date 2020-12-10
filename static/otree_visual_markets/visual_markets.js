@@ -32,7 +32,18 @@ class VisualMarkets extends PolymerElement {
             availableY: Number,
             proposedX: Number,
             proposedY: Number,
+            heatmapEnabled: Boolean,
         };
+    }
+
+    // override attribute deseralization to make the way booleans work a little more intuitive
+    // change it so that a nonexistent attribute or an attribute of "false" deserializes to false
+    // and everything else deserializes to true. this makes passing booleans in from the template a lot easier.
+    _deserializeValue(value, type) {
+        if (type == Boolean) {
+            return !(!value || value.toLowerCase() == 'false');
+        }
+        return super._deserializeValue(value, type);
     }
 
     static get template() {
@@ -200,6 +211,7 @@ class VisualMarkets extends PolymerElement {
                         <div class="square-aspect">
                             <heatmap-element
                                 id="heatmap"
+                                heatmap-enabled="[[ heatmapEnabled ]]"
                                 utility-function="[[ utilityFunction ]]"
                                 x-bounds="[[ xBounds ]]"
                                 y-bounds="[[ yBounds ]]"
@@ -229,7 +241,6 @@ class VisualMarkets extends PolymerElement {
         this.tradeFormat = (making_order, taking_order) => {
             const price = this.$.currency_scaler.yToHumanReadable(making_order.price);
             const volume = this.$.currency_scaler.xToHumanReadable(making_order.traded_volume);
-            console.log(making_order.price);
             return `${volume} @ $${price}`;
         };
     }

@@ -1,5 +1,6 @@
 import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polymer/polymer/polymer-element.js';
 import './lib/marchingsquares.js'
+import './currency_scaler.js';
 
 /**
  * utility function to map a value from one range to another
@@ -41,7 +42,7 @@ class HeatmapElement extends PolymerElement {
                 :host {
                     display: block;
                     /* the width/height of the x and y axes */
-                    --axis-size: 4em;
+                    --axis-size: 2em;
                     /* extra padding on the top/right of the heatmap to leave room for axis labels at extremes */
                     --axis-padding: 2em;
                 }
@@ -79,6 +80,10 @@ class HeatmapElement extends PolymerElement {
                     height: 100%;
                 }
             </style>
+
+            <currency-scaler
+                id="currency_scaler"
+            ></currency-scaler>
             
             <div class="main_container">
                 <canvas id="y_scale"></canvas>
@@ -133,8 +138,8 @@ class HeatmapElement extends PolymerElement {
             'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
-            'drawXAxis(xBounds, axisSize, axisPadding)',
-            'drawYAxis(yBounds, axisSize, axisPadding)',
+            'drawXAxis(xBounds, axisSize, axisPadding, width, height)',
+            'drawYAxis(yBounds, axisSize, axisPadding, width, height)',
         ]
     }
 
@@ -406,7 +411,9 @@ class HeatmapElement extends PolymerElement {
         }
     }
 
-    drawXAxis(xBounds, axisSize, axisPadding) {
+    drawXAxis(xBounds, axisSize, axisPadding, _width, _height) {
+        // _width and _height aren't used, they're just there so that the axes are redrawn when the size of the heatmap changes
+
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
@@ -425,14 +432,17 @@ class HeatmapElement extends PolymerElement {
             const curTickPixels = remap(curTick, xBounds[0], xBounds[1], axisSize-1, width-axisPadding);
             ctx.moveTo(curTickPixels, 1);
             ctx.lineTo(curTickPixels, 10);
-            ctx.fillText(curTick, curTickPixels + 5, 5)
+            const curTickText = this.$.currency_scaler.xToHumanReadable(curTick)
+            ctx.fillText(curTickText, curTickPixels + 5, 5)
             curTick += interval;
         }
 
         ctx.stroke();
     }
 
-    drawYAxis(yBounds, axisSize, axisPadding) {
+    drawYAxis(yBounds, axisSize, axisPadding, _width, _height) {
+        // _width and _height aren't used, they're just there so that the axes are redrawn when the size of the heatmap changes
+
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
@@ -451,7 +461,8 @@ class HeatmapElement extends PolymerElement {
             const curTickPixels = remap(curTick, yBounds[0], yBounds[1], height-axisSize+1, axisPadding);
             ctx.moveTo(width, curTickPixels);
             ctx.lineTo(width - 10, curTickPixels);
-            ctx.fillText(curTick, width-5, curTickPixels - 5)
+            const curTickText = this.$.currency_scaler.yToHumanReadable(curTick)
+            ctx.fillText(curTickText, width-5, curTickPixels - 5)
             curTick += interval;
         }
 

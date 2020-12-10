@@ -9,6 +9,7 @@ import '/static/otree_markets/simple_modal.js';
 import '/static/otree_markets/event_log.js';
 
 import './heatmap_element.js';
+import './currency_scaler.js';
 
 class VisualMarkets extends PolymerElement {
 
@@ -54,21 +55,36 @@ class VisualMarkets extends PolymerElement {
                     display: flex;
                     justify-content: space-evenly;
                     padding: 10px;
+                    height: 80vh;
                 }
-                .main-container > div {
-                    margin: 5px;
+                .left-side {
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                }
+                .list-container {
+                    display: flex;
+                    flex: 1;
+                }
+                .list-cell {
+                    min-width: 10vw;
+                    flex: 1;
+                    margin: 10px;
                     display: flex;
                     flex-direction: column;
                 }
-                .list-cell {
-                    flex: 0 1 15%;
+                .info-table {
+                    margin: 10px;
+                    text-align: center;
                 }
                 .heatmap-cell {
+                    display: flex;
+                    align-items: center;
                     flex: 1;
                     max-width: 80vh;
                 }
 
-                order-list, trade-list, event-log, heatmap-element {
+                order-list, trade-list, heatmap-element {
                     border: 1px solid black;
                 }
 
@@ -87,11 +103,11 @@ class VisualMarkets extends PolymerElement {
                     height: 100%;
                 }
 
-                .info-table {
-                    text-align: center;
-                }
             </style>
 
+            <currency-scaler
+                id="currency_scaler"
+            ></currency-scaler>
             <simple-modal
                 id="modal"
             ></simple-modal>
@@ -111,59 +127,73 @@ class VisualMarkets extends PolymerElement {
 
             <div class="full-width">
                 <div class="main-container">
-                    <div class="list-cell">
-                        <h3>Bids</h3>
-                        <order-list
-                            class="flex-fill"
-                            orders="[[bids]]"
-                            on-order-canceled="_order_canceled"
-                            on-order-accepted="_order_accepted"
-                        ></order-list>
-                        <div>
-                            <div on-input="_updateProposedBundleBid">
+                    <div class="left-side">
+                        <div class="list-container">
+                            <div class="list-cell">
+                                <h3>Bids</h3>
+                                <order-list
+                                    class="flex-fill"
+                                    orders="[[bids]]"
+                                    on-order-canceled="_order_canceled"
+                                    on-order-accepted="_order_accepted"
+                                    display-format="[[orderFormat]]"
+                                ></order-list>
                                 <div>
-                                    <label for="bid_price_input">Price</label>
-                                    <input id="bid_price_input" type="number" min="0">
-                                </div>
-                                <div>
-                                    <label for="bid_volume_input">Volume</label>
-                                    <input id="bid_volume_input" type="number" min="1">
+                                    <div on-input="_updateProposedBundleBid">
+                                        <div>
+                                            <label for="bid_price_input">Price</label>
+                                            <input id="bid_price_input" type="number" min="0">
+                                        </div>
+                                        <div>
+                                            <label for="bid_volume_input">Volume</label>
+                                            <input id="bid_volume_input" type="number" min="1">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="button" on-click="_enter_bid">Enter Bid</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <button type="button" on-click="_enter_bid">Enter Bid</button>
+                            <div class="list-cell">
+                                <h3>Trades</h3>
+                                <trade-list
+                                    class="flex-fill"
+                                    trades="[[trades]]"
+                                    display-format="[[tradeFormat]]"
+                                ></trade-list>
+                            </div>
+                            <div class="list-cell">
+                                <h3>Asks</h3>
+                                <order-list
+                                    class="flex-fill"
+                                    orders="[[asks]]"
+                                    on-order-canceled="_order_canceled"
+                                    on-order-accepted="_order_accepted"
+                                    display-format="[[orderFormat]]"
+                                ></order-list>
+                                <div>
+                                    <div on-input="_updateProposedBundleAsk">
+                                        <div>
+                                            <label for="ask_price_input">Price</label>
+                                            <input id="ask_price_input" type="number" min="0">
+                                        </div>
+                                        <div>
+                                            <label for="ask_volume_input">Volume</label>
+                                            <input id="ask_volume_input" type="number" min="1">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="button" on-click="_enter_ask">Enter Ask</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="list-cell">
-                        <h3>Trades</h3>
-                        <trade-list
-                            class="flex-fill"
-                            trades="[[trades]]"
-                        ></trade-list>
-                    </div>
-                    <div class="list-cell">
-                        <h3>Asks</h3>
-                        <order-list
-                            class="flex-fill"
-                            orders="[[asks]]"
-                            on-order-canceled="_order_canceled"
-                            on-order-accepted="_order_accepted"
-                        ></order-list>
-                        <div>
-                            <div on-input="_updateProposedBundleAsk">
-                                <div>
-                                    <label for="ask_price_input">Price</label>
-                                    <input id="ask_price_input" type="number" min="0">
-                                </div>
-                                <div>
-                                    <label for="ask_volume_input">Volume</label>
-                                    <input id="ask_volume_input" type="number" min="1">
-                                </div>
-                            </div>
+                        <div class="info-table">
                             <div>
-                                <button type="button" on-click="_enter_ask">Enter Ask</button>
+                                <h3>Your Allocation</h3>
                             </div>
+                            <span>X: [[ xToHumanReadable(settledX) ]]</span>
+                            <span>Y: [[ yToHumanReadable(settledY) ]]</span>
                         </div>
                     </div>
                     <div class="heatmap-cell">
@@ -183,12 +213,6 @@ class VisualMarkets extends PolymerElement {
                         </div>
                     </div>
                 </div>
-                <div class="info-table">
-                    <span>Settled X: [[settledX]]</span>
-                    <span>Available X: [[availableX]]</span>
-                    <span>Settled Y: [[settledY]]</span>
-                    <span>Available Y: [[availableY]]</span>
-                </div>
             </div>
         `;
     }
@@ -196,6 +220,18 @@ class VisualMarkets extends PolymerElement {
     ready() {
         super.ready();
         this.pcode = this.$.constants.participantCode;
+
+        this.orderFormat = order => {
+            const price = this.$.currency_scaler.yToHumanReadable(order.price);
+            const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
+            return `${volume} @ $${price}`;
+        };
+        this.tradeFormat = (making_order, taking_order) => {
+            const price = this.$.currency_scaler.yToHumanReadable(making_order.price);
+            const volume = this.$.currency_scaler.xToHumanReadable(making_order.traded_volume);
+            console.log(making_order.price);
+            return `${volume} @ $${price}`;
+        };
     }
     
     computeUtilityFunction(utilityFunctionString) {
@@ -230,8 +266,8 @@ class VisualMarkets extends PolymerElement {
         if (proposedX > this.settledX) {
             const volume = proposedX - this.settledX;
             const price = Math.round((this.settledY - proposedY) / volume);
-            this.$.bid_volume_input.value = volume;
-            this.$.bid_price_input.value = price;
+            this.$.bid_volume_input.value = this.$.currency_scaler.xToHumanReadable(volume);
+            this.$.bid_price_input.value = this.$.currency_scaler.yToHumanReadable(price);
             
             this.$.ask_volume_input.value = '';
             this.$.ask_price_input.value = '';
@@ -239,8 +275,8 @@ class VisualMarkets extends PolymerElement {
         else {
             const volume = this.settledX - proposedX;
             const price = Math.round((proposedY - this.settledY) / volume);
-            this.$.ask_volume_input.value = volume;
-            this.$.ask_price_input.value = price;
+            this.$.ask_volume_input.value = this.$.currency_scaler.xToHumanReadable(volume);
+            this.$.ask_price_input.value = this.$.currency_scaler.yToHumanReadable(price);
 
             this.$.bid_volume_input.value = '';
             this.$.bid_price_input.value = '';
@@ -248,8 +284,11 @@ class VisualMarkets extends PolymerElement {
     }
 
     _updateProposedBundleBid() {
-        const price = parseInt(this.$.bid_price_input.value);
-        const volume = parseInt(this.$.bid_volume_input.value);
+        let price = parseFloat(this.$.bid_price_input.value);
+        price = this.$.currency_scaler.yFromHumanReadable(price);
+        let volume = parseFloat(this.$.bid_volume_input.value);
+        volume = this.$.currency_scaler.xFromHumanReadable(volume);
+
         if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
             this.setProperties({
                 proposedX: null,
@@ -265,8 +304,10 @@ class VisualMarkets extends PolymerElement {
     }
 
     _updateProposedBundleAsk() {
-        const price = parseInt(this.$.ask_price_input.value);
-        const volume = parseInt(this.$.ask_volume_input.value);
+        let price = parseFloat(this.$.ask_price_input.value);
+        price = this.$.currency_scaler.yFromHumanReadable(price);
+        let volume = parseFloat(this.$.ask_volume_input.value);
+        volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
             this.setProperties({
                 proposedX: null,
@@ -282,13 +323,15 @@ class VisualMarkets extends PolymerElement {
     }
 
     _enter_bid() {
-        const price = parseInt(this.$.bid_price_input.value);
+        let price = parseFloat(this.$.bid_price_input.value);
+        price = this.$.currency_scaler.yFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             // this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
-        const volume = parseInt(this.$.bid_volume_input.value);
+        let volume = parseFloat(this.$.bid_volume_input.value);
+        volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
             // this.$.log.error('Can\'t enter bid: invalid volume');
             return;
@@ -298,13 +341,15 @@ class VisualMarkets extends PolymerElement {
     }
 
     _enter_ask() {
-        const price = parseInt(this.$.ask_price_input.value);
+        let price = parseFloat(this.$.ask_price_input.value);
+        price = this.$.currency_scaler.yFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             // this.$.log.error('Can\'t enter ask: invalid price');
             return;
         }
 
-        const volume = parseInt(this.$.ask_volume_input.value);
+        let volume = parseFloat(this.$.ask_volume_input.value);
+        volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
             // this.$.log.error('Can\'t enter ask: invalid volume');
             return;
@@ -333,7 +378,10 @@ class VisualMarkets extends PolymerElement {
         if (order.pcode == this.pcode)
             return;
 
-        this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${order.volume} units for $${order.price}?`
+        const price = this.$.currency_scaler.yToHumanReadable(order.price);
+        const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
+
+        this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${volume} units for $${price}?`
         this.$.modal.on_close_callback = (accepted) => {
             if (!accepted)
                 return;
@@ -341,6 +389,13 @@ class VisualMarkets extends PolymerElement {
             this.$.trader_state.accept_order(order);
         };
         this.$.modal.show();
+    }
+
+    xToHumanReadable(a) {
+        return this.$.currency_scaler.xToHumanReadable(a);
+    }
+    yToHumanReadable(a) {
+        return this.$.currency_scaler.yToHumanReadable(a);
     }
 }
 

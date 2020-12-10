@@ -7,6 +7,7 @@
 
 {% block scripts %}
     <script type="module" src="/static/otree_visual_markets/visual_markets.js"></script>
+    <script type="module" src="/static/otree_visual_markets/currency_scaler.js"></script>
     <script type="module" src="/static/otree_markets/disable_interface_overlay.js"></script>
 {% endblock %}
 
@@ -25,6 +26,11 @@
     ></disable-interface-overlay>
 
     {% with config=subsession.config %}
+    <currency-scaler
+        x-scale="{{ config.x_currency_scale }}"
+        y-scale="{{ config.y_currency_scale }}"
+    ></currency-scaler>
+
     <visual-markets
         x-bounds="{{ config.x_bounds }}"
         y-bounds="{{ config.y_bounds }}"

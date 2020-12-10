@@ -27,13 +27,6 @@ class Subsession(markets_models.Subsession):
             return
         return super().creating_session()
     
-    def utility(self, x, y):
-        return eval(
-            self.config.utility_function,
-            globals=math.__dict__,
-            locals={'x', x, 'y', y}
-        )
-
 
 class Group(markets_models.Group):
 

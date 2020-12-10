@@ -37,23 +37,48 @@ class Subsession(markets_models.Subsession):
 
 class Group(markets_models.Group):
 
-    def confirm_enter(self, order):
-        exchange = order.exchange
+    def _on_enter_event(self, event):
+        '''handle an enter message sent from the frontend
+        
+        if the order is valid and can be entered, first cancel all of this player's other active orders on the same side.
+        this ensures that players can only ever have one active order of each type.
+        '''
+        enter_msg = event.value
+        asset_name = markets_models.SINGLE_ASSET_NAME
+
+        player = self.get_player(enter_msg['pcode'])
+        if player.check_available(enter_msg['is_bid'], enter_msg['price'], enter_msg['volume'], asset_name):
+            self.try_cancel_active_order(enter_msg['pcode'], enter_msg['is_bid'])
+        
+        super()._on_enter_event(event)
+    
+    def _on_accept_event(self, event):
+        '''handle an accept message sent from the frontend
+        
+        if the order can be accepted, first cancel all of this player's other active orders on the same side as the pseudo-order they're entering with their accept.
+        this ensures that players can only ever have one active order of each type.
+        '''
+        accepted_order_dict = event.value
+        asset_name = markets_models.SINGLE_ASSET_NAME
+
+        sender_pcode = event.participant.code
+        player = self.get_player(sender_pcode)
+
+        if player.check_available(not accepted_order_dict['is_bid'], accepted_order_dict['price'], accepted_order_dict['volume'], asset_name):
+            self.try_cancel_active_order(sender_pcode, not accepted_order_dict['is_bid'])
+        
+        super()._on_accept_event(event)
+   
+    def try_cancel_active_order(self, pcode, is_bid):
+        '''try to cancel active orders owned by players with pcode `pcode`, of type `is_bid` and in the
+        '''
+        exchange = self.exchanges.get()
         try:
-            # query for active orders in the same exchange as the new order, from the same player
-            old_order = (
-                exchange.orders
-                    .filter(pcode=order.pcode, is_bid=order.is_bid, status=OrderStatusEnum.ACTIVE)
-                    .exclude(id=order.id)
-                    .get()
-            )
+            old_order = exchange.orders.get(pcode=pcode, is_bid=is_bid, status=OrderStatusEnum.ACTIVE)
         except Order.DoesNotExist: 
             pass
         else:
-            # if another order exists, cancel it
             exchange.cancel_order(old_order.id)
-
-        super().confirm_enter(order)
 
 
 class Player(markets_models.Player):

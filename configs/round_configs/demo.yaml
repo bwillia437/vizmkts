@@ -13,11 +13,11 @@ x_currency_scale: 10
 x_bounds: [0, 100]
 
 # starting y (cash) endowment for each player
-y_endowment: 20
+y_endowment: 20000
 # scaling for y asset
 y_currency_scale: 1000
 # heatmap bounds for y asset
-y_bounds: [0, 100]
+y_bounds: [0, 100000]
 
 utility_function: "(x ** 0.5) * (y ** 0.5)"
 max_utility: 100

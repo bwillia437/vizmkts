@@ -41,7 +41,7 @@ class HeatmapElement extends PolymerElement {
                 :host {
                     display: block;
                     /* the width/height of the x and y axes */
-                    --axis-size: 1.5em;
+                    --axis-size: 4em;
                     /* extra padding on the top/right of the heatmap to leave room for axis labels at extremes */
                     --axis-padding: 2em;
                 }
@@ -134,7 +134,7 @@ class HeatmapElement extends PolymerElement {
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
             'drawXAxis(xBounds, axisSize, axisPadding)',
-            'drawYAxis(xBounds, axisSize, axisPadding)',
+            'drawYAxis(yBounds, axisSize, axisPadding)',
         ]
     }
 
@@ -388,16 +388,22 @@ class HeatmapElement extends PolymerElement {
     }
 
     // get an appropriate tick interval for an x or y axis given the bounds of that axis
-    // intervals are chosen as 1, 2, 5 or a multiple of 10
+    // intervals are chosen as 1, 2, 5 or a multiple of an appropriate power of 10
     getTickInterval(bounds) {
         const range = bounds[1] - bounds[0];
-        const maxNumTicks = 12;
-        [1, 2, 5].forEach(interval => {
+        const maxNumTicks = 20;
+        for (const interval of [1, 2, 5]) {
             if (range / interval <= maxNumTicks) return interval;
-        });
+        }
         let interval = 10;
-        while (range / interval > maxNumTicks) interval += 10;
-        return interval;
+        let base = 10;
+        while (true) {
+            for (let i = 0; i < 9; i++) {
+                interval += base;
+                if (range / interval <= maxNumTicks) return interval;
+            }
+            base *= 10;
+        }
     }
 
     drawXAxis(xBounds, axisSize, axisPadding) {
@@ -410,15 +416,15 @@ class HeatmapElement extends PolymerElement {
         const ctx = this.$.x_scale.getContext('2d');
         ctx.textBaseline = 'top'
         ctx.beginPath();
-        ctx.moveTo(axisSize, 1);
+        ctx.moveTo(axisSize-1, 1);
         ctx.lineTo(width-axisPadding, 1);
 
         const interval = this.getTickInterval(xBounds);
         let curTick = xBounds[0];
         while (curTick <= xBounds[1]) {
-            const curTickPixels = remap(curTick, xBounds[0], xBounds[1], axisSize, width-axisPadding);
+            const curTickPixels = remap(curTick, xBounds[0], xBounds[1], axisSize-1, width-axisPadding);
             ctx.moveTo(curTickPixels, 1);
-            ctx.lineTo(curTickPixels, height/2);
+            ctx.lineTo(curTickPixels, 10);
             ctx.fillText(curTick, curTickPixels + 5, 5)
             curTick += interval;
         }
@@ -437,14 +443,14 @@ class HeatmapElement extends PolymerElement {
         ctx.textAlign = 'right';
         ctx.beginPath();
         ctx.moveTo(width-1, axisPadding);
-        ctx.lineTo(width-1, height-axisSize);
+        ctx.lineTo(width-1, height-axisSize+1);
 
         const interval = this.getTickInterval(yBounds);
         let curTick = yBounds[0];
         while (curTick <= yBounds[1]) {
-            const curTickPixels = remap(curTick, yBounds[0], yBounds[1], height-axisSize, axisPadding);
+            const curTickPixels = remap(curTick, yBounds[0], yBounds[1], height-axisSize+1, axisPadding);
             ctx.moveTo(width, curTickPixels);
-            ctx.lineTo(width/2, curTickPixels);
+            ctx.lineTo(width - 10, curTickPixels);
             ctx.fillText(curTick, width-5, curTickPixels - 5)
             curTick += interval;
         }

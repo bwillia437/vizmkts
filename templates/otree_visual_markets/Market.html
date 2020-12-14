@@ -25,19 +25,18 @@
     <disable-interface-overlay
     ></disable-interface-overlay>
 
-    {% with config=subsession.config %}
     <currency-scaler
         x-scale="{{ config.x_currency_scale }}"
         y-scale="{{ config.y_currency_scale }}"
     ></currency-scaler>
 
+    <!-- note that x_bounds and y_bounds here are the scaled bounds from vars_for_template, not the bounds from the config -->
     <visual-markets
-        x-bounds="{{ config.x_bounds }}"
-        y-bounds="{{ config.y_bounds }}"
+        x-bounds="{{ x_bounds }}"
+        y-bounds="{{ y_bounds }}"
         max-utility="{{ config.max_utility }}"
         utility-function-string="{{ config.utility_function }}"
         heatmap-enabled="{{ config.heatmap_enabled }}"
     ></visual-markets>
-    {% endwith %}
 
 {% endblock %}

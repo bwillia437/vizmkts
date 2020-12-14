@@ -18,13 +18,22 @@ class Subsession(markets_models.Subsession):
     def config(self):
         config_name = self.session.config['session_config_file']
         return MarketConfig.get(config_name, self.round_number)
-    
-    def allow_short(self):
-        return self.config.allow_short
+
+    def do_grouping(self):
+        ppg = self.config.players_per_group
+        # if ppg is None, just use the default grouping where everyone is in one group
+        if not ppg:
+            return
+        group_matrix = []
+        players = self.get_players()
+        for i in range(0, len(players), ppg):
+            group_matrix.append(players[i:i+ppg])
+        self.set_group_matrix(group_matrix)
 
     def creating_session(self):
         if self.round_number > self.config.num_rounds:
             return
+        self.do_grouping()
         return super().creating_session()
     
 
@@ -77,7 +86,15 @@ class Group(markets_models.Group):
 class Player(markets_models.Player):
 
     def asset_endowment(self):
-        return self.subsession.config.x_endowment
+        config = self.subsession.config
+        endowment = config.x_endowment
+        if isinstance(endowment, list):
+            endowment = endowment[self.id_in_group % len(endowment)]
+        return endowment * config.x_currency_scale
     
     def cash_endowment(self):
-        return self.subsession.config.y_endowment
+        config = self.subsession.config
+        endowment = config.y_endowment
+        if isinstance(endowment, list):
+            endowment = endowment[self.id_in_group % len(endowment)]
+        return endowment * config.y_currency_scale

@@ -93,6 +93,7 @@ class VisualMarkets extends PolymerElement {
                     align-items: center;
                     flex: 1;
                     max-width: 80vh;
+                    padding: 10px 10px 0 0;
                 }
 
                 order-list, trade-list, heatmap-element {
@@ -203,8 +204,18 @@ class VisualMarkets extends PolymerElement {
                             <div>
                                 <h3>Your Allocation</h3>
                             </div>
-                            <span>X: [[ xToHumanReadable(settledX) ]]</span>
-                            <span>Y: [[ yToHumanReadable(settledY) ]]</span>
+                            <div>
+                                <span>X: </span>
+                                <span>[[ xToHumanReadable(settledX) ]]</span>
+                            </div>
+                            <div>
+                                <span>Y: </span>
+                                <span>[[ yToHumanReadable(settledY) ]]</span>
+                            </div>
+                            <div>
+                                <span>Utility: </span>
+                                <span>[[ displayUtilityFunction(settledX, settledY) ]]</span>
+                            </div>
                         </div>
                     </div>
                     <div class="heatmap-cell">
@@ -246,7 +257,13 @@ class VisualMarkets extends PolymerElement {
     }
     
     computeUtilityFunction(utilityFunctionString) {
-        return new Function('x', 'y', 'return ' + utilityFunctionString);
+        const unscaled_utility = new Function('x', 'y', 'return ' + utilityFunctionString);
+        return (x, y) => {
+            return unscaled_utility(
+                this.$.currency_scaler.xToHumanReadable(x),
+                this.$.currency_scaler.yToHumanReadable(y)
+            );
+        }
     }
 
     onHeatmapClick(e) {
@@ -407,6 +424,12 @@ class VisualMarkets extends PolymerElement {
     }
     yToHumanReadable(a) {
         return this.$.currency_scaler.yToHumanReadable(a);
+    }
+    displayUtilityFunction(x, y) {
+        // return a string with the utility value for x and y, with a maximum of 2 decimal points
+        return this.utilityFunction(x, y)
+            .toFixed(2)
+            .replace(/\.?0+$/, '');
     }
 }
 

@@ -3,13 +3,13 @@ import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 import '/static/otree-redwood/src/otree-constants/otree-constants.js';
 
 import '/static/otree_markets/trader_state.js'
-import '/static/otree_markets/order_list.js';
 import '/static/otree_markets/trade_list.js';
 import '/static/otree_markets/simple_modal.js';
 import '/static/otree_markets/event_log.js';
 
 import './heatmap_element.js';
 import './currency_scaler.js';
+import './filtered_order_list.js';
 
 class VisualMarkets extends PolymerElement {
 
@@ -33,6 +33,7 @@ class VisualMarkets extends PolymerElement {
             proposedX: Number,
             proposedY: Number,
             heatmapEnabled: Boolean,
+            showNBestOrders: Number,
         };
     }
 
@@ -96,7 +97,7 @@ class VisualMarkets extends PolymerElement {
                     padding: 10px 10px 0 0;
                 }
 
-                order-list, trade-list, heatmap-element {
+                filtered-order-list, trade-list, heatmap-element {
                     border: 1px solid black;
                 }
 
@@ -143,13 +144,14 @@ class VisualMarkets extends PolymerElement {
                         <div class="list-container">
                             <div class="list-cell">
                                 <h3>Bids</h3>
-                                <order-list
+                                <filtered-order-list
                                     class="flex-fill"
                                     orders="[[bids]]"
                                     on-order-canceled="_order_canceled"
                                     on-order-accepted="_order_accepted"
                                     display-format="[[orderFormat]]"
-                                ></order-list>
+                                    limit-num="[[showNBestOrders]]"
+                                ></filtered-order-list>
                                 <div>
                                     <div on-input="_updateProposedBundleBid">
                                         <div>
@@ -176,13 +178,14 @@ class VisualMarkets extends PolymerElement {
                             </div>
                             <div class="list-cell">
                                 <h3>Asks</h3>
-                                <order-list
+                                <filtered-order-list
                                     class="flex-fill"
                                     orders="[[asks]]"
                                     on-order-canceled="_order_canceled"
                                     on-order-accepted="_order_accepted"
                                     display-format="[[orderFormat]]"
-                                ></order-list>
+                                    limit-num="[[showNBestOrders]]"
+                                ></filtered-order-list>
                                 <div>
                                     <div on-input="_updateProposedBundleAsk">
                                         <div>

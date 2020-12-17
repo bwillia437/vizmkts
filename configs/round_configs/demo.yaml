@@ -27,3 +27,6 @@ period_length: 120
 
 # whether to draw the heatmap
 heatmap_enabled: true
+# this number determines the number of orders to display in the list. if it's 0, then all orders are shown.
+# your own orders are always shown
+show_n_best_orders: 0

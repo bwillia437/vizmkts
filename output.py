@@ -46,7 +46,7 @@ class AllocationCsvGenerator(BaseCSVMarketOutputGenerator):
         for player_number in range(len(group.get_players())):
             player_data[group.get_players()[player_number].participant.code] = [config.x_endowment, config.y_endowment]
 
-        print(player_data)
+        # print(player_data)
 
         x = list(player_data)
 
@@ -71,11 +71,11 @@ class AllocationCsvGenerator(BaseCSVMarketOutputGenerator):
                 price = making_order.price
                 volume = making_order.traded_volume
                 if (making_order.pcode in str(player_data.keys())):
-                    print('Making order is: ', making_order.pcode, )
+                    # print('Making order is: ', making_order.pcode, )
                     if (making_order.is_bid):
                         player_data[making_order.pcode][0] += volume
                         player_data[making_order.pcode][1]-= price*volume
-                        print('player pcode is:', player_data[making_order.pcode])
+                        # print('player pcode is:', player_data[making_order.pcode])
                     else: 
                         player_data[making_order.pcode][0] -= volume
                         player_data[making_order.pcode][1]+= price*volume
@@ -104,7 +104,7 @@ class AllocationCsvGenerator(BaseCSVMarketOutputGenerator):
                 j for k in my_List2 for j in k              
 
             ]
-        print(player_data)
+        # print(player_data)
 
         # raise NotImplementedError()
 

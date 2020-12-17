@@ -30,3 +30,7 @@ heatmap_enabled: true
 # this number determines the number of orders to display in the list. if it's 0, then all orders are shown.
 # your own orders are always shown
 show_n_best_orders: 0
+# this number determines the number of trades to display in the list. if it's 0, then all trades are shown.
+show_n_most_recent_trades: 1
+# if true, show only your own trades in the trade list
+show_own_trades_only: true

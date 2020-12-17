@@ -8,7 +8,7 @@ class FilteredOrderList extends OrderList {
         return {
             limitNum: {
                 type: Number,
-                value: null,
+                value: 0,
             },
         }
     }
@@ -50,7 +50,7 @@ class FilteredOrderList extends OrderList {
             ></otree-constants>
 
             <div id="container">
-                <template is="dom-repeat" items="{{ limitOrders(orders.*, limitNum) }}" filter="{{_getAssetFilterFunc(assetName)}}">
+                <template is="dom-repeat" items="{{ filterOrders(orders.*, limitNum) }}" filter="{{_getAssetFilterFunc(assetName)}}">
                     <div on-dblclick="_acceptOrder" class$="[[_getOrderClass(item)]]">
                         <span>[[displayFormat(item)]]</span>
                         <span class="cancel-button" on-click="_cancelOrder">&#9746;</span>
@@ -60,13 +60,12 @@ class FilteredOrderList extends OrderList {
         `;
     }
 
-    limitOrders(ordersChange, limitNum) {
+    filterOrders(ordersChange, limitNum) {
         const orders = ordersChange.base;
         if (typeof orders === 'undefined') return;
 
-        if (limitNum == 0) return orders.slice();
         return orders.filter((order, i) => {
-            return (order.pcode == this.pcode || i < limitNum);
+            return order.pcode == this.pcode || limitNum == 0 || i < limitNum;
         });
     }
 

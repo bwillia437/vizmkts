@@ -3,13 +3,13 @@ import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 import '/static/otree-redwood/src/otree-constants/otree-constants.js';
 
 import '/static/otree_markets/trader_state.js'
-import '/static/otree_markets/trade_list.js';
 import '/static/otree_markets/simple_modal.js';
 import '/static/otree_markets/event_log.js';
 
 import './heatmap_element.js';
 import './currency_scaler.js';
 import './filtered_order_list.js';
+import './filtered_trade_list.js';
 
 class VisualMarkets extends PolymerElement {
 
@@ -34,6 +34,8 @@ class VisualMarkets extends PolymerElement {
             proposedY: Number,
             heatmapEnabled: Boolean,
             showNBestOrders: Number,
+            showNMostRecentTrades: Number,
+            showOwnTradesOnly: Boolean,
         };
     }
 
@@ -97,7 +99,7 @@ class VisualMarkets extends PolymerElement {
                     padding: 10px 10px 0 0;
                 }
 
-                filtered-order-list, trade-list, heatmap-element {
+                filtered-order-list, filtered-trade-list, heatmap-element {
                     border: 1px solid black;
                 }
 
@@ -170,11 +172,13 @@ class VisualMarkets extends PolymerElement {
                             </div>
                             <div class="list-cell">
                                 <h3>Trades</h3>
-                                <trade-list
+                                <filtered-trade-list
                                     class="flex-fill"
                                     trades="[[trades]]"
                                     display-format="[[tradeFormat]]"
-                                ></trade-list>
+                                    limit-num="[[showNMostRecentTrades]]"
+                                    show-own-only="[[showOwnTradesOnly]]"
+                                ></filtered-trade-list>
                             </div>
                             <div class="list-cell">
                                 <h3>Asks</h3>

@@ -54,6 +54,19 @@ class VisualMarkets extends PolymerElement {
             <style>
                 * {
                     box-sizing: border-box;
+                    font-family: "Times New Roman", Times, serif;
+                }
+                h3 {
+                    font-size: 16px;
+                    letter-spacing: 2px;
+                    word-spacing: 2px;
+                    color: #FAFAFA;
+                    font-weight: bold;
+                    text-decoration: none;
+                    font-style: normal;
+                    font-variant: normal;
+                    margin-left: 10px;
+                    text-transform: none;
                 }
                 .full-width {
                     width: 100vw;
@@ -88,8 +101,40 @@ class VisualMarkets extends PolymerElement {
                     flex-direction: column;
                 }
                 .info-table {
-                    margin: 10px;
+                    display:table;
+                    margin: auto;
                     text-align: center;
+                    border-radius: 5px;
+                    width: 40%;
+                    border: 2px solid black;
+                    align-items:center;
+                }
+                .Title
+                {
+                    border: 2px solid black;
+                    background-color: black;
+                    color:white;
+                    text-align: center;
+                    font-weight: bold;
+                }
+                .Heading
+                {
+                    display: table-row;
+                    font-weight: bold;
+                    text-align: center;
+                }
+                .Row
+                {
+                    display: table-row;
+                    text-align:center;
+                }
+                .Cell
+                {
+                    display: table-cell;
+                    border: solid;
+                    border-width: thin;
+                    padding-left: 5px;
+                    padding-right: 5px;
                 }
                 .heatmap-cell {
                     display: flex;
@@ -100,8 +145,15 @@ class VisualMarkets extends PolymerElement {
                 }
 
                 filtered-order-list, filtered-trade-list, heatmap-element {
+                    border-radius: 5px;
                     border: 1px solid black;
+                    margin-top:10px;
+                    margin-bottom:10px;
+                    margin-left:10px;
+                    margin-right:10px;
+                    // display:block;
                 }
+
 
                 /* these css rules make an element square, based on its width */
                 .square-aspect {
@@ -117,6 +169,95 @@ class VisualMarkets extends PolymerElement {
                     width: 100%;
                     height: 100%;
                 }
+
+                .pricevolumeinput{ 
+                    text-align: center;
+                    margin: 10px;  
+                    display: table;
+                    border-radius: 2px;
+                    border: 1px solid grey;
+                    justify-content: center;
+                    align-items: center;                
+                }
+
+                .infoboxcell{
+                    text-align: center;
+                    margin: auto;  
+                    width:100%;
+                    display: table;
+                    border-radius: 2px;
+                    border: 1px solid grey;
+                    justify-content: center;
+                    align-items: center;     
+                }
+                .infoboxrow{
+                    margin-left: 10px;
+                    margin-right: 10px;
+                    text-align: center;
+                    width:100%;
+                    display: table;
+                    border-radius: 2px;
+                    border: 1px solid grey;
+                    justify-content: center;
+                    align-items: center;     
+                }
+
+                label{
+                    margin:auto;
+                    padding:2px;
+                    // border-radius:5px;
+                    border-right: 1px solid grey;
+                    border-left: 1px solid white;
+                    border:1;
+                    -webkit-box-shadow: inset 3px 3px 25px 35px #EBEBEB; 
+                    box-shadow: inset 3px 3px 25px 35px #EBEBEB;
+                    align-text: center;
+                    display: table-cell;
+                }
+                span {
+                    display: table-cell;
+                    padding: 0 0 0 5px
+                }
+
+                input[type=number] {
+                    margin:auto;
+                    background-color: transparent;
+                    border: 0px solid;
+                    width: 90%;
+                    height: 30px;
+                  }
+
+                button{
+                    margin: auto;
+                    color: #fff !important;
+                    text-transform: uppercase;
+                    text-decoration: none;
+                    
+                    padding: 6px;
+                    border-radius: 5px;
+                    display: flex;
+                    border: none;
+                    transition: all 0.4s ease 0s;
+                }
+
+                
+                button:hover{
+                    text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
+                    -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+                    -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+                    transition: all 0.4s ease 0s;
+}
+                }
+
+                .form-group{
+                    width: auto;
+                    display: inline-block;
+                    padding: 20px;
+                    float: left;
+                  }
+                
+                
+
 
             </style>
 
@@ -144,9 +285,12 @@ class VisualMarkets extends PolymerElement {
                 <div class="main-container">
                     <div class="left-side">
                         <div class="list-container">
-                            <div class="list-cell">
-                                <h3>Bids</h3>
+                            <div class="list-cell" style= "border-radius: 5px;border: 2px solid red;">
+                                <div class"Title" style= "background-color: red;">
+                                    <h3>Bids</h3>
+                                </div>
                                 <filtered-order-list
+                                    border: center;
                                     class="flex-fill"
                                     orders="[[bids]]"
                                     on-order-canceled="_order_canceled"
@@ -154,24 +298,28 @@ class VisualMarkets extends PolymerElement {
                                     display-format="[[orderFormat]]"
                                     limit-num="[[showNBestOrders]]"
                                 ></filtered-order-list>
-                                <div>
+                                <div style="margin:auto;">
                                     <div on-input="_updateProposedBundleBid">
-                                        <div>
-                                            <label for="bid_price_input">Price</label>
-                                            <input id="bid_price_input" type="number" min="0">
+                                        <div class ="pricevolumeinput" style="width: 90%;
+                                        height: 30;">
+                                            <label for="bid_price_input">Price: </label>
+                                            <input id="bid_price_input" type="number" min="0" >
                                         </div>
-                                        <div>
-                                            <label for="bid_volume_input">Volume</label>
-                                            <input id="bid_volume_input" type="number" min="1">
+                                        <div class ="pricevolumeinput" style="width:90%">
+                                            <label for="bid_volume_input">Qty: </label>
+                                            <input id="bid_volume_input" type="number" min="1" >
                                         </div>
                                     </div>
                                     <div>
-                                        <button type="button" on-click="_enter_bid">Enter Bid</button>
+                                        <button type="button" on-click="_enter_bid" style = "background: #E01936;" >Bid</button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="list-cell">
-                                <h3>Trades</h3>
+                            <div class="list-cell" style= "border-radius: 5px;border: 2px solid grey; 
+                            outline-offset: 0px;">
+                                <div class"Title" style= "background-color: grey;">
+                                    <h3>Trades</h3>
+                                </div>
                                 <filtered-trade-list
                                     class="flex-fill"
                                     trades="[[trades]]"
@@ -180,8 +328,11 @@ class VisualMarkets extends PolymerElement {
                                     show-own-only="[[showOwnTradesOnly]]"
                                 ></filtered-trade-list>
                             </div>
-                            <div class="list-cell">
-                                <h3>Asks</h3>
+                            <div class="list-cell" style= "border-radius: 5px;border: 2px solid green; 
+                            outline-offset: 0px;">
+                                <div class"Title" style= "background-color: green;">
+                                    <h3>Asks</h3>
+                                </div>
                                 <filtered-order-list
                                     class="flex-fill"
                                     orders="[[asks]]"
@@ -190,40 +341,51 @@ class VisualMarkets extends PolymerElement {
                                     display-format="[[orderFormat]]"
                                     limit-num="[[showNBestOrders]]"
                                 ></filtered-order-list>
-                                <div>
+                                <div style="margin:auto;">
                                     <div on-input="_updateProposedBundleAsk">
-                                        <div>
-                                            <label for="ask_price_input">Price</label>
+                                    <div class ="pricevolumeinput" style="width: 90%;
+                                    height: 30;">
+                                            <label for="ask_price_input">Price: </label>
                                             <input id="ask_price_input" type="number" min="0">
                                         </div>
-                                        <div>
-                                            <label for="ask_volume_input">Volume</label>
+                                        <div class ="pricevolumeinput" style="width:90%">
+                                            <label for="ask_volume_input">Qty: </label>
                                             <input id="ask_volume_input" type="number" min="1">
                                         </div>
                                     </div>
                                     <div>
-                                        <button type="button" on-click="_enter_ask">Enter Ask</button>
+                                        <button type="button" on-click="_enter_ask" style = "background: #09C206;">Ask</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+
                         <div class="info-table">
-                            <div>
-                                <h3>Your Allocation</h3>
+                            <div class ="Title">Your Allocation</div>
+
+                            <div class ="infoboxcell">
+                                <div class="Heading">
+                                    <label for="[[ xToHumanReadable(settledX) ]]">X:</label>
+                                    <span>[[ xToHumanReadable(settledX) ]]</span>
+                                </div>
                             </div>
-                            <div>
-                                <span>X: </span>
-                                <span>[[ xToHumanReadable(settledX) ]]</span>
+
+                            <div class="infoboxcell">
+                                <div class="Heading">
+                                    <label for="[[ yToHumanReadable(settledY) ]]">Y:</label>
+                                    <span>[[ yToHumanReadable(settledY) ]]</span>
+                                </div>
                             </div>
-                            <div>
-                                <span>Y: </span>
-                                <span>[[ yToHumanReadable(settledY) ]]</span>
-                            </div>
-                            <div>
-                                <span>Utility: </span>
-                                <span>[[ displayUtilityFunction(settledX, settledY) ]]</span>
+
+                            <div class="infoboxcell">
+                                <div class="Heading">
+                                    <label for="[[ displayUtilityFunction(settledX, settledY) ]]">Utility: </label>
+                                    <span>[[ displayUtilityFunction(settledX, settledY) ]]</span>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                     <div class="heatmap-cell">
                         <div class="square-aspect">

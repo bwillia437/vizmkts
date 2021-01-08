@@ -1,4 +1,5 @@
 import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polymer/polymer/polymer-element.js';
+import '/static/otree-redwood/node_modules/@polymer/polymer/lib/elements/dom-if.js';
 import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 import '/static/otree-redwood/src/otree-constants/otree-constants.js';
 
@@ -54,7 +55,6 @@ class VisualMarkets extends PolymerElement {
             <style>
                 * {
                     box-sizing: border-box;
-                    font-family: "Times New Roman", Times, serif;
                 }
                 h3 {
                     font-size: 16px;
@@ -92,10 +92,11 @@ class VisualMarkets extends PolymerElement {
                 .list-container {
                     display: flex;
                     flex: 1;
+                    justify-content: center;
                 }
                 .list-cell {
-                    min-width: 10vw;
-                    flex: 1;
+                    flex: 1 0 40px;
+                    max-width: 250px;
                     margin: 10px;
                     display: flex;
                     flex-direction: column;
@@ -151,7 +152,6 @@ class VisualMarkets extends PolymerElement {
                     margin-bottom:10px;
                     margin-left:10px;
                     margin-right:10px;
-                    // display:block;
                 }
 
 
@@ -211,7 +211,6 @@ class VisualMarkets extends PolymerElement {
                     border:1;
                     -webkit-box-shadow: inset 3px 3px 25px 35px #EBEBEB; 
                     box-shadow: inset 3px 3px 25px 35px #EBEBEB;
-                    align-text: center;
                     display: table-cell;
                 }
                 span {
@@ -243,15 +242,12 @@ class VisualMarkets extends PolymerElement {
                 
                 button:hover{
                     text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
-                    -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-                    -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+                    box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
                     transition: all 0.4s ease 0s;
-}
                 }
 
                 .form-group{
                     width: auto;
-                    display: inline-block;
                     padding: 20px;
                     float: left;
                   }
@@ -286,7 +282,7 @@ class VisualMarkets extends PolymerElement {
                     <div class="left-side">
                         <div class="list-container">
                             <div class="list-cell" style= "border-radius: 5px;border: 2px solid red;">
-                                <div class"Title" style= "background-color: red;">
+                                <div class="Title" style= "background-color: red;">
                                     <h3>Bids</h3>
                                 </div>
                                 <filtered-order-list
@@ -317,7 +313,7 @@ class VisualMarkets extends PolymerElement {
                             </div>
                             <div class="list-cell" style= "border-radius: 5px;border: 2px solid grey; 
                             outline-offset: 0px;">
-                                <div class"Title" style= "background-color: grey;">
+                                <div class="Title" style= "background-color: grey;">
                                     <h3>Trades</h3>
                                 </div>
                                 <filtered-trade-list
@@ -330,7 +326,7 @@ class VisualMarkets extends PolymerElement {
                             </div>
                             <div class="list-cell" style= "border-radius: 5px;border: 2px solid green; 
                             outline-offset: 0px;">
-                                <div class"Title" style= "background-color: green;">
+                                <div class="Title" style= "background-color: green;">
                                     <h3>Asks</h3>
                                 </div>
                                 <filtered-order-list
@@ -387,23 +383,24 @@ class VisualMarkets extends PolymerElement {
                         </div>
 
                     </div>
-                    <div class="heatmap-cell">
-                        <div class="square-aspect">
-                            <heatmap-element
-                                id="heatmap"
-                                heatmap-enabled="[[ heatmapEnabled ]]"
-                                utility-function="[[ utilityFunction ]]"
-                                x-bounds="[[ xBounds ]]"
-                                y-bounds="[[ yBounds ]]"
-                                current-x="[[ settledX ]]"
-                                current-y="[[ settledY ]]"
-                                max-utility="[[ maxUtility ]]"
-                                proposed-x="[[ proposedX ]]"
-                                proposed-y="[[ proposedY ]]"
-                                on-heatmap-click="onHeatmapClick"
-                            ></heatmap-element>
+                    <template is="dom-if" if="{{ heatmapEnabled }}">
+                        <div class="heatmap-cell">
+                            <div class="square-aspect">
+                                <heatmap-element
+                                    id="heatmap"
+                                    utility-function="[[ utilityFunction ]]"
+                                    x-bounds="[[ xBounds ]]"
+                                    y-bounds="[[ yBounds ]]"
+                                    current-x="[[ settledX ]]"
+                                    current-y="[[ settledY ]]"
+                                    max-utility="[[ maxUtility ]]"
+                                    proposed-x="[[ proposedX ]]"
+                                    proposed-y="[[ proposedY ]]"
+                                    on-heatmap-click="onHeatmapClick"
+                                ></heatmap-element>
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         `;

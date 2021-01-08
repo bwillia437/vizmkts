@@ -112,7 +112,6 @@ class HeatmapElement extends PolymerElement {
             utilityFunction: {
                 type: Object,
             },
-            heatmapEnabled: Boolean,
             proposedX: Number,
             proposedY: Number,
             xBounds: Array,
@@ -135,7 +134,7 @@ class HeatmapElement extends PolymerElement {
 
     static get observers() {
         return [
-            'drawHeatmap(heatmapEnabled, utilityFunction, xBounds, yBounds, maxUtility, width, height)',
+            'drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height)',
             'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
@@ -362,11 +361,9 @@ class HeatmapElement extends PolymerElement {
     /**
      * Generate the heatmap
      */
-    drawHeatmap(heatmapEnabled, utilityFunction, xBounds, yBounds, maxUtility, width, height) {
+    drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
-
-        if (!heatmapEnabled) return;
 
         const ctx = this.$.heatmap_canvas.getContext('2d');
 

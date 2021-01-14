@@ -23,7 +23,7 @@ utility_function: "(x ** 0.5) * (y ** 0.5)"
 max_utility: 100
 
 # the length of the round in seconds
-period_length: 120
+period_length: null
 
 # whether to draw the heatmap
 heatmap_enabled: true

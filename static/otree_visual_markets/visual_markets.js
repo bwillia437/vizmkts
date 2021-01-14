@@ -52,210 +52,7 @@ class VisualMarkets extends PolymerElement {
 
     static get template() {
         return html`
-            <style>
-                * {
-                    box-sizing: border-box;
-                }
-                h3 {
-                    font-size: 16px;
-                    letter-spacing: 2px;
-                    word-spacing: 2px;
-                    color: #FAFAFA;
-                    font-weight: bold;
-                    text-decoration: none;
-                    font-style: normal;
-                    font-variant: normal;
-                    margin-left: 10px;
-                    text-transform: none;
-                }
-                .full-width {
-                    width: 100vw;
-                    margin-left: 50%;
-                    transform: translateX(-50%);
-                }
-                .flex-fill {
-                    flex: 1 0 0;
-                    min-height: 0;
-                }
-
-                .main-container {
-                    display: flex;
-                    justify-content: space-evenly;
-                    padding: 10px;
-                    height: 80vh;
-                }
-                .left-side {
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                }
-                .list-container {
-                    display: flex;
-                    flex: 1;
-                    justify-content: center;
-                }
-                .list-cell {
-                    flex: 1 0 40px;
-                    max-width: 250px;
-                    margin: 10px;
-                    display: flex;
-                    flex-direction: column;
-                }
-                .info-table {
-                    display:table;
-                    margin: auto;
-                    text-align: center;
-                    border-radius: 5px;
-                    width: 40%;
-                    border: 2px solid black;
-                    align-items:center;
-                }
-                .Title
-                {
-                    border: 2px solid black;
-                    background-color: black;
-                    color:white;
-                    text-align: center;
-                    font-weight: bold;
-                }
-                .Heading
-                {
-                    display: table-row;
-                    font-weight: bold;
-                    text-align: center;
-                }
-                .Row
-                {
-                    display: table-row;
-                    text-align:center;
-                }
-                .Cell
-                {
-                    display: table-cell;
-                    border: solid;
-                    border-width: thin;
-                    padding-left: 5px;
-                    padding-right: 5px;
-                }
-                .heatmap-cell {
-                    display: flex;
-                    align-items: center;
-                    flex: 1;
-                    max-width: 80vh;
-                    padding: 10px 10px 0 0;
-                }
-
-                filtered-order-list, filtered-trade-list, heatmap-element {
-                    border-radius: 5px;
-                    border: 1px solid black;
-                    margin-top:10px;
-                    margin-bottom:10px;
-                    margin-left:10px;
-                    margin-right:10px;
-                }
-
-
-                /* these css rules make an element square, based on its width */
-                .square-aspect {
-                    height: 0;
-                    width: 100%;
-                    padding-top: 100%;
-                    position: relative;
-                }
-                .square-aspect > * {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                }
-
-                .pricevolumeinput{ 
-                    text-align: center;
-                    margin: 10px;  
-                    display: table;
-                    border-radius: 2px;
-                    border: 1px solid grey;
-                    justify-content: center;
-                    align-items: center;                
-                }
-
-                .infoboxcell{
-                    text-align: center;
-                    margin: auto;  
-                    width:100%;
-                    display: table;
-                    border-radius: 2px;
-                    border: 1px solid grey;
-                    justify-content: center;
-                    align-items: center;     
-                }
-                .infoboxrow{
-                    margin-left: 10px;
-                    margin-right: 10px;
-                    text-align: center;
-                    width:100%;
-                    display: table;
-                    border-radius: 2px;
-                    border: 1px solid grey;
-                    justify-content: center;
-                    align-items: center;     
-                }
-
-                label{
-                    margin:auto;
-                    padding:2px;
-                    // border-radius:5px;
-                    border-right: 1px solid grey;
-                    border-left: 1px solid white;
-                    border:1;
-                    -webkit-box-shadow: inset 3px 3px 25px 35px #EBEBEB; 
-                    box-shadow: inset 3px 3px 25px 35px #EBEBEB;
-                    display: table-cell;
-                }
-                span {
-                    display: table-cell;
-                    padding: 0 0 0 5px
-                }
-
-                input[type=number] {
-                    margin:auto;
-                    background-color: transparent;
-                    border: 0px solid;
-                    width: 90%;
-                    height: 30px;
-                  }
-
-                button{
-                    margin: auto;
-                    color: #fff !important;
-                    text-transform: uppercase;
-                    text-decoration: none;
-                    
-                    padding: 6px;
-                    border-radius: 5px;
-                    display: flex;
-                    border: none;
-                    transition: all 0.4s ease 0s;
-                }
-
-                
-                button:hover{
-                    text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
-                    box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-                    transition: all 0.4s ease 0s;
-                }
-
-                .form-group{
-                    width: auto;
-                    padding: 20px;
-                    float: left;
-                  }
-                
-                
-
-
-            </style>
+            <link rel="stylesheet" href="/static/otree_visual_markets/css/visual_markets.css">
 
             <currency-scaler
                 id="currency_scaler"
@@ -275,9 +72,14 @@ class VisualMarkets extends PolymerElement {
                 available-assets="{{availableX}}"
                 settled-cash="{{settledY}}"
                 available-cash="{{availableY}}"
+                time-remaining="{{timeRemaining}}"
             ></trader-state>
 
             <div class="full-width">
+                <div class="header">
+                    <span>Time Remaining:</span><span>[[ formatTimeRemaining(timeRemaining) ]]</span>
+                </div>
+
                 <div class="main-container">
                     <div class="left-side">
                         <div class="list-container">
@@ -596,6 +398,12 @@ class VisualMarkets extends PolymerElement {
         return this.utilityFunction(x, y)
             .toFixed(2)
             .replace(/\.?0+$/, '');
+    }
+    formatTimeRemaining(timeRemaining) {
+        const minutes = Math.floor(timeRemaining/60);
+        let seconds = '' + timeRemaining%60;
+        seconds = seconds.length == 1 ? '0' + seconds : seconds;
+        return `${minutes}:${seconds}`;
     }
 }
 

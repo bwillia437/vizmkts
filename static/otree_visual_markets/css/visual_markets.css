@@ -55,12 +55,26 @@ h3 {
     display: flex;
     flex-direction: column;
 }
+.info-table-and-log {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.info-table-and-log > div {
+    flex: 1;
+    margin: 5px;
+}
+.log {
+    max-width: 500px;
+    height: 10em;
+    border: 2px solid black;
+    border-radius: 5px;
+}
 .info-table {
+    max-width: 300px;
     display:table;
-    margin: auto;
     text-align: center;
     border-radius: 5px;
-    width: 40%;
     border: 2px solid black;
     align-items:center;
 }

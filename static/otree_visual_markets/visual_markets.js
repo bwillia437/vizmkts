@@ -73,6 +73,7 @@ class VisualMarkets extends PolymerElement {
                 settled-cash="{{settledY}}"
                 available-cash="{{availableY}}"
                 time-remaining="{{timeRemaining}}"
+                on-error="_onError"
             ></trader-state>
 
             <div class="full-width">
@@ -158,31 +159,36 @@ class VisualMarkets extends PolymerElement {
                             </div>
                         </div>
 
+                        <div class="info-table-and-log">
+                            <div class="info-table">
+                                <div class ="Title">Your Allocation</div>
 
-                        <div class="info-table">
-                            <div class ="Title">Your Allocation</div>
+                                <div class ="infoboxcell">
+                                    <div class="Heading">
+                                        <label for="[[ xToHumanReadable(settledX) ]]">X:</label>
+                                        <span>[[ xToHumanReadable(settledX) ]]</span>
+                                    </div>
+                                </div>
 
-                            <div class ="infoboxcell">
-                                <div class="Heading">
-                                    <label for="[[ xToHumanReadable(settledX) ]]">X:</label>
-                                    <span>[[ xToHumanReadable(settledX) ]]</span>
+                                <div class="infoboxcell">
+                                    <div class="Heading">
+                                        <label for="[[ yToHumanReadable(settledY) ]]">Y:</label>
+                                        <span>[[ yToHumanReadable(settledY) ]]</span>
+                                    </div>
+                                </div>
+
+                                <div class="infoboxcell">
+                                    <div class="Heading">
+                                        <label for="[[ displayUtilityFunction(settledX, settledY) ]]">Utility: </label>
+                                        <span>[[ displayUtilityFunction(settledX, settledY) ]]</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="infoboxcell">
-                                <div class="Heading">
-                                    <label for="[[ yToHumanReadable(settledY) ]]">Y:</label>
-                                    <span>[[ yToHumanReadable(settledY) ]]</span>
-                                </div>
-                            </div>
-
-                            <div class="infoboxcell">
-                                <div class="Heading">
-                                    <label for="[[ displayUtilityFunction(settledX, settledY) ]]">Utility: </label>
-                                    <span>[[ displayUtilityFunction(settledX, settledY) ]]</span>
-                                </div>
+                            <div class="log">
+                                <event-log id="log"></event-log>
                             </div>
                         </div>
+                        
 
                     </div>
                     <template is="dom-if" if="{{ heatmapEnabled }}">
@@ -322,14 +328,14 @@ class VisualMarkets extends PolymerElement {
         let price = parseFloat(this.$.bid_price_input.value);
         price = this.$.currency_scaler.yFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
-            // this.$.log.error('Can\'t enter bid: invalid price');
+            this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
         let volume = parseFloat(this.$.bid_volume_input.value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
-            // this.$.log.error('Can\'t enter bid: invalid volume');
+            this.$.log.error('Can\'t enter bid: invalid volume');
             return;
         }
 
@@ -340,14 +346,14 @@ class VisualMarkets extends PolymerElement {
         let price = parseFloat(this.$.ask_price_input.value);
         price = this.$.currency_scaler.yFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
-            // this.$.log.error('Can\'t enter ask: invalid price');
+            this.$.log.error('Can\'t enter ask: invalid price');
             return;
         }
 
         let volume = parseFloat(this.$.ask_volume_input.value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
-            // this.$.log.error('Can\'t enter ask: invalid volume');
+            this.$.log.error('Can\'t enter ask: invalid volume');
             return;
         }
 
@@ -385,6 +391,11 @@ class VisualMarkets extends PolymerElement {
             this.$.trader_state.accept_order(order);
         };
         this.$.modal.show();
+    }
+
+    _onError(event) {
+        const message = event.detail;
+        this.$.log.error(message);
     }
 
     xToHumanReadable(a) {

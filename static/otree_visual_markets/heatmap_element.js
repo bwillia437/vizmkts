@@ -1,31 +1,8 @@
 import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polymer/polymer/polymer-element.js';
-import './lib/marchingsquares.js'
+import './lib/marchingsquares.js';
+import './heatmap-thermometer.js';
 import './currency_scaler.js';
-
-/**
- * utility function to map a value from one range to another
- *
- * @param {Number} value the value to be re-mapped
- * @param {Number} lo1 the low value of the range to be mapped from
- * @param {Number} hi1 the high value of the range to be mapped from
- * @param {Number} lo2 the low value of the range to be mapped to
- * @param {Number} hi2 the high value of the range to be mapped to
- */
-const remap = (value, lo1, hi1, lo2, hi2) => {
-    const t = (value - lo1) / (hi1 - lo1);
-    return lo2 + t * (hi2 - lo2);
-};
-
-/**
- * utility function to contain a value within some bounds
- *
- * @param {Number} value the value to be clamped
- * @param {Number} min the min value of the clamping range
- * @param {Number} max the max value of the clamping range
- */
-const clamp = (value, min, max) => {
-    return Math.min(Math.max(value, min), max);
-}
+import { remap, clamp } from './utils.js';
 
 /**
  * `heatmap-element`
@@ -40,14 +17,28 @@ class HeatmapElement extends PolymerElement {
         return html`
             <style>
                 :host {
+                    box-sizing: border-box;
                     display: block;
                     /* the width/height of the x and y axes */
                     --axis-size: 2em;
                     /* extra padding on the top/right of the heatmap to leave room for axis labels at extremes */
                     --axis-padding: 2em;
                 }
-                .main_container {
+                /* these css rules make an element square, based on its width */
+                .square-aspect {
+                    height: 0;
+                    width: 100%;
+                    padding-top: 100%;
                     position: relative;
+                }
+                .square-aspect > * {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+                .main_container {
                     width: 100%;
                     height: 100%;
                 }
@@ -79,22 +70,40 @@ class HeatmapElement extends PolymerElement {
                     width: 100%;
                     height: 100%;
                 }
+                .thermometer-container {
+                    margin: 5px var(--axis-padding) 0 var(--axis-size);
+                    border: 1px solid black;
+                }
+                heatmap-thermometer {
+                    height: 30px;
+                }
             </style>
 
             <currency-scaler
                 id="currency_scaler"
             ></currency-scaler>
             
-            <div class="main_container">
-                <canvas id="y_scale"></canvas>
-                <div id="heatmap_container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">
-                    <!-- use stacked canvases as 'layers' so we can clear different elements individually -->
-                    <canvas id="heatmap_canvas"></canvas>
-                    <canvas id="hover_curve_canvas"></canvas>
-                    <canvas id="current_bundle_canvas"></canvas>
-                    <canvas id="proposed_bundle_canvas"></canvas>
-                </div>
-                <canvas id="x_scale"></canvas>
+            <div class="thermometer-container">
+                <heatmap-thermometer
+                    color-scheme="[[ colorScheme ]]"
+                    max-utility="[[ maxUtility ]]"
+                    current-utility="[[ currentUtility ]]"
+                    hover-utility="[[ hoverUtility ]]"
+                ></heatmap-thermometer>
+            </div>
+
+            <div class="square-aspect">
+                <div class="main_container">
+                    <canvas id="y_scale"></canvas>
+                    <div id="heatmap_container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">
+                        <!-- use stacked canvases as 'layers' so we can clear different elements individually -->
+                        <canvas id="heatmap_canvas"></canvas>
+                        <canvas id="hover_curve_canvas"></canvas>
+                        <canvas id="current_bundle_canvas"></canvas>
+                        <canvas id="proposed_bundle_canvas"></canvas>
+                    </div>
+                    <canvas id="x_scale"></canvas>
+                    </div>
                 </div>
             </div>
         `;
@@ -119,6 +128,14 @@ class HeatmapElement extends PolymerElement {
             currentX: Number,
             currentY: Number,
             maxUtility: Number,
+            hoverUtility: {
+                type: Number,
+                computed: 'calcHoverUtility(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height)',
+            },
+            currentUtility: {
+                type: Number,
+                computed: 'calcCurrentUtility(currentX, currentY, utilityFunction, xBounds, yBounds)',
+            },
             // the size in pixels of the grid that the indifference curves are evaluated over
             // a larger value is faster but results in blockier curves
             _quadTreeGridSize: {
@@ -135,8 +152,8 @@ class HeatmapElement extends PolymerElement {
     static get observers() {
         return [
             'drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height)',
-            'drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
-            'drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree)',
+            'drawHoverCurve(hoverUtility, width, height, quadTree)',
+            'drawCurrentBundle(currentX, currentY, currentUtility, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
             'drawXAxis(xBounds, axisSize, axisPadding, width, height)',
             'drawYAxis(yBounds, axisSize, axisPadding, width, height)',
@@ -266,15 +283,13 @@ class HeatmapElement extends PolymerElement {
         }));
     }
 
-    drawHoverCurve(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
+    calcHoverUtility(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
-        const ctx = this.$.hover_curve_canvas.getContext('2d');
-        ctx.clearRect(0, 0, width, height);
         // if mouse coordinates aren't defined, or are outside the screen bounds, just return after clearing the hover canvas
         if (mouseX === null || mouseY === null || mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
-            return;
+            return null;
         }
 
         const x = remap(mouseX, 0, width, xBounds[0], xBounds[1]);
@@ -282,26 +297,49 @@ class HeatmapElement extends PolymerElement {
 
         // if mouse position is in one of the 'impossible' quadrants, just return
         if ((x < currentX && y < currentY) || (x > this.currentX && y > this.currentY)) {
-            return;
+            return null;
         }
 
-        const utility = utilityFunction(x, y);
-        this.drawIndifferenceCurve(utility, ctx, quadTree);
+        return utilityFunction(x, y);
     }
 
-    drawCurrentBundle(currentX, currentY, utilityFunction, xBounds, yBounds, width, height, quadTree) {
+    drawHoverCurve(hoverUtility, width, height, quadTree) {
+        // if any arguments are undefined, just return
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const ctx = this.$.hover_curve_canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+
+        if (hoverUtility === null)
+            return;
+
+        this.drawIndifferenceCurve(hoverUtility, ctx, quadTree);
+    }
+
+    calcCurrentUtility(currentX, currentY, utilityFunction, xBounds, yBounds) {
+        // if any arguments are undefined, just return
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        if (currentX < xBounds[0] || currentX > xBounds[1] || currentY < yBounds[0] || currentY > yBounds[1]) {
+            return null;
+        }
+
+        // draw indifference curve for current bundle
+        return utilityFunction(currentX, currentY);
+    }
+
+    drawCurrentBundle(currentX, currentY, currentUtility, xBounds, yBounds, width, height, quadTree) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
         const ctx = this.$.current_bundle_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
-        if (currentX < xBounds[0] || currentX > xBounds[1] || currentY < yBounds[0] || currentY > yBounds[1]) {
+
+        if (currentUtility === null) {
             return;
         }
 
-        // draw indifference curve for current bundle
-        const utility = utilityFunction(currentX, currentY);
-        this.drawIndifferenceCurve(utility, ctx, quadTree);
+        this.drawIndifferenceCurve(currentUtility, ctx, quadTree);
 
         // the current bundle in screen coordinates
         const screenX = remap(currentX, xBounds[0], xBounds[1], 0, width);

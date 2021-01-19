@@ -193,20 +193,18 @@ class VisualMarkets extends PolymerElement {
                     </div>
                     <template is="dom-if" if="{{ heatmapEnabled }}">
                         <div class="heatmap-cell">
-                            <div class="square-aspect">
-                                <heatmap-element
-                                    id="heatmap"
-                                    utility-function="[[ utilityFunction ]]"
-                                    x-bounds="[[ xBounds ]]"
-                                    y-bounds="[[ yBounds ]]"
-                                    current-x="[[ settledX ]]"
-                                    current-y="[[ settledY ]]"
-                                    max-utility="[[ maxUtility ]]"
-                                    proposed-x="[[ proposedX ]]"
-                                    proposed-y="[[ proposedY ]]"
-                                    on-heatmap-click="onHeatmapClick"
-                                ></heatmap-element>
-                            </div>
+                            <heatmap-element
+                                id="heatmap"
+                                utility-function="[[ utilityFunction ]]"
+                                x-bounds="[[ xBounds ]]"
+                                y-bounds="[[ yBounds ]]"
+                                current-x="[[ settledX ]]"
+                                current-y="[[ settledY ]]"
+                                max-utility="[[ maxUtility ]]"
+                                proposed-x="[[ proposedX ]]"
+                                proposed-y="[[ proposedY ]]"
+                                on-heatmap-click="onHeatmapClick"
+                            ></heatmap-element>
                         </div>
                     </template>
                 </div>

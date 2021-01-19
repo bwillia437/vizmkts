@@ -111,6 +111,9 @@ h3 {
     max-width: 80vh;
     padding: 10px 10px 0 0;
 }
+heatmap-element {
+    width: 100%;
+}
 
 filtered-order-list, filtered-trade-list, heatmap-element {
     border-radius: 5px;
@@ -119,22 +122,6 @@ filtered-order-list, filtered-trade-list, heatmap-element {
     margin-bottom:10px;
     margin-left:10px;
     margin-right:10px;
-}
-
-
-/* these css rules make an element square, based on its width */
-.square-aspect {
-    height: 0;
-    width: 100%;
-    padding-top: 100%;
-    position: relative;
-}
-.square-aspect > * {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
 }
 
 .pricevolumeinput{ 

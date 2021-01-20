@@ -11,6 +11,7 @@ import './heatmap_element.js';
 import './currency_scaler.js';
 import './filtered_order_list.js';
 import './filtered_trade_list.js';
+import './utility-grid.js';
 
 class VisualMarkets extends PolymerElement {
 
@@ -205,6 +206,17 @@ class VisualMarkets extends PolymerElement {
                                 proposed-y="[[ proposedY ]]"
                                 on-heatmap-click="onHeatmapClick"
                             ></heatmap-element>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="{{ !heatmapEnabled }}">
+                        <div class="grid-cell">
+                            <utility-grid
+                                utility-function="[[ utilityFunction ]]"
+                                current-x="[[ settledX ]]"
+                                current-y="[[ settledY ]]"
+                                x-bounds="[[ xBounds ]]"
+                                y-bounds="[[ yBounds ]]"
+                            ></utility-grid>
                         </div>
                     </template>
                 </div>

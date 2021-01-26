@@ -268,21 +268,25 @@ class VisualMarkets extends PolymerElement {
             proposedY: proposedY,
         });
 
+        // the number of decimal points to display for price and volume inputs
+        const numVolumeDigits = Math.log10(this.$.currency_scaler.xScale);
+        const numPriceDigits = Math.log10(this.$.currency_scaler.yScale / this.$.currency_scaler.xScale);
+
         // calculate the required trade to move from the current bundle to the proposed one
         if (proposedX > this.currentX) {
-            const volume = proposedX - this.currentX;
-            const price = Math.round((this.currentY - proposedY) / volume);
-            this.$.bid_volume_input.value = this.$.currency_scaler.xToHumanReadable(volume);
-            this.$.bid_price_input.value = this.$.currency_scaler.yToHumanReadable(price);
+            const volume = this.$.currency_scaler.xToHumanReadable(proposedX - this.currentX);
+            const price = this.$.currency_scaler.yToHumanReadable(this.currentY - proposedY) / volume;
+            this.$.bid_volume_input.value = volume.toFixed(numVolumeDigits);
+            this.$.bid_price_input.value = price.toFixed(numPriceDigits);
             
             this.$.ask_volume_input.value = '';
             this.$.ask_price_input.value = '';
         }
         else {
-            const volume = this.currentX - proposedX;
-            const price = Math.round((proposedY - this.currentY) / volume);
-            this.$.ask_volume_input.value = this.$.currency_scaler.xToHumanReadable(volume);
-            this.$.ask_price_input.value = this.$.currency_scaler.yToHumanReadable(price);
+            const volume = this.$.currency_scaler.xToHumanReadable(this.currentX - proposedX);
+            const price = this.$.currency_scaler.yToHumanReadable(proposedY - this.currentY) / volume;
+            this.$.ask_volume_input.value = volume.toFixed(numVolumeDigits);
+            this.$.ask_price_input.value = price.toFixed(numPriceDigits);
 
             this.$.bid_volume_input.value = '';
             this.$.bid_price_input.value = '';
@@ -291,7 +295,7 @@ class VisualMarkets extends PolymerElement {
 
     _updateProposedBundleBid() {
         let price = parseFloat(this.$.bid_price_input.value);
-        price = this.$.currency_scaler.yFromHumanReadable(price);
+        price = this.priceFromHumanReadable(price);
         let volume = parseFloat(this.$.bid_volume_input.value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
 
@@ -311,7 +315,7 @@ class VisualMarkets extends PolymerElement {
 
     _updateProposedBundleAsk() {
         let price = parseFloat(this.$.ask_price_input.value);
-        price = this.$.currency_scaler.yFromHumanReadable(price);
+        price = this.priceFromHumanReadable(price);
         let volume = parseFloat(this.$.ask_volume_input.value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
@@ -330,14 +334,14 @@ class VisualMarkets extends PolymerElement {
 
     _enter_bid() {
         let price = parseFloat(this.$.bid_price_input.value);
-        price = this.$.currency_scaler.yFromHumanReadable(price);
+        price = this.priceFromHumanReadable.yFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
         let volume = parseFloat(this.$.bid_volume_input.value);
-        volume = this.$.currency_scaler.xFromHumanReadable(volume);
+        volume = this.priceFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
             this.$.log.error('Can\'t enter bid: invalid volume');
             return;
@@ -348,7 +352,7 @@ class VisualMarkets extends PolymerElement {
 
     _enter_ask() {
         let price = parseFloat(this.$.ask_price_input.value);
-        price = this.$.currency_scaler.yFromHumanReadable(price);
+        price = this.priceFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             this.$.log.error('Can\'t enter ask: invalid price');
             return;
@@ -419,6 +423,11 @@ class VisualMarkets extends PolymerElement {
         let seconds = '' + timeRemaining%60;
         seconds = seconds.length == 1 ? '0' + seconds : seconds;
         return `${minutes}:${seconds}`;
+    }
+    priceFromHumanReadable(price) {
+        // price is in units Y per unit X, so scaling has to respect that
+        const factor = this.$.currency_scaler.yScale / this.$.currency_scaler.xScale;
+        return Math.round(price * factor);
     }
 }
 

@@ -28,10 +28,8 @@ class VisualMarkets extends PolymerElement {
             bids: Array,
             asks: Array,
             trades: Array,
-            settledX: Number,
-            availableX: Number,
-            settledY: Number,
-            availableY: Number,
+            currentX: Number,
+            currentY: Number,
             proposedX: Number,
             proposedY: Number,
             heatmapEnabled: Boolean,
@@ -69,10 +67,8 @@ class VisualMarkets extends PolymerElement {
                 bids="{{bids}}"
                 asks="{{asks}}"
                 trades="{{trades}}"
-                settled-assets="{{settledX}}"
-                available-assets="{{availableX}}"
-                settled-cash="{{settledY}}"
-                available-cash="{{availableY}}"
+                settled-assets="{{currentX}}"
+                settled-cash="{{currentY}}"
                 time-remaining="{{timeRemaining}}"
                 on-error="_onError"
             ></trader-state>
@@ -90,7 +86,6 @@ class VisualMarkets extends PolymerElement {
                                     <h3>Bids</h3>
                                 </div>
                                 <filtered-order-list
-                                    border: center;
                                     class="flex-fill"
                                     orders="[[bids]]"
                                     on-order-canceled="_order_canceled"
@@ -143,8 +138,7 @@ class VisualMarkets extends PolymerElement {
                                 ></filtered-order-list>
                                 <div style="margin:auto;">
                                     <div on-input="_updateProposedBundleAsk">
-                                    <div class ="pricevolumeinput" style="width: 90%;
-                                    height: 30;">
+                                    <div class ="pricevolumeinput" style="width: 90%; height: 30;">
                                             <label for="ask_price_input">Price: </label>
                                             <input id="ask_price_input" type="number" min="0">
                                         </div>
@@ -166,22 +160,22 @@ class VisualMarkets extends PolymerElement {
 
                                 <div class ="infoboxcell">
                                     <div class="Heading">
-                                        <label for="[[ xToHumanReadable(settledX) ]]">X:</label>
-                                        <span>[[ xToHumanReadable(settledX) ]]</span>
+                                        <label for="[[ xToHumanReadable(currentX) ]]">X:</label>
+                                        <span>[[ xToHumanReadable(currentX) ]]</span>
                                     </div>
                                 </div>
 
                                 <div class="infoboxcell">
                                     <div class="Heading">
-                                        <label for="[[ yToHumanReadable(settledY) ]]">Y:</label>
-                                        <span>[[ yToHumanReadable(settledY) ]]</span>
+                                        <label for="[[ yToHumanReadable(currentY) ]]">Y:</label>
+                                        <span>[[ yToHumanReadable(currentY) ]]</span>
                                     </div>
                                 </div>
 
                                 <div class="infoboxcell">
                                     <div class="Heading">
-                                        <label for="[[ displayUtilityFunction(settledX, settledY) ]]">Utility: </label>
-                                        <span>[[ displayUtilityFunction(settledX, settledY) ]]</span>
+                                        <label for="[[ displayUtilityFunction(currentX, currentY) ]]">Utility: </label>
+                                        <span>[[ displayUtilityFunction(currentX, currentY) ]]</span>
                                     </div>
                                 </div>
                             </div>
@@ -199,8 +193,8 @@ class VisualMarkets extends PolymerElement {
                                 utility-function="[[ utilityFunction ]]"
                                 x-bounds="[[ xBounds ]]"
                                 y-bounds="[[ yBounds ]]"
-                                current-x="[[ settledX ]]"
-                                current-y="[[ settledY ]]"
+                                current-x="[[ currentX ]]"
+                                current-y="[[ currentY ]]"
                                 max-utility="[[ maxUtility ]]"
                                 proposed-x="[[ proposedX ]]"
                                 proposed-y="[[ proposedY ]]"
@@ -212,8 +206,8 @@ class VisualMarkets extends PolymerElement {
                         <div class="grid-cell">
                             <utility-grid
                                 utility-function="[[ utilityFunction ]]"
-                                current-x="[[ settledX ]]"
-                                current-y="[[ settledY ]]"
+                                current-x="[[ currentX ]]"
+                                current-y="[[ currentY ]]"
                                 x-bounds="[[ xBounds ]]"
                                 y-bounds="[[ yBounds ]]"
                             ></utility-grid>
@@ -257,16 +251,16 @@ class VisualMarkets extends PolymerElement {
         // so when we calculate the proposed Y, we actually calculate the nearest Y to the click
         // which is an integer multiple of the difference in X between the current X and the proposed X.
         const proposedX = e.detail.x;
-        if (proposedX == this.settledX)
+        if (proposedX == this.currentX)
             return;
 
-        const xDist = proposedX - this.settledX;
-        const proposedY = this.settledY + xDist * Math.round((e.detail.y - this.settledY) / xDist);
-        if (proposedY == this.settledY)
+        const xDist = proposedX - this.currentX;
+        const proposedY = this.currentY + xDist * Math.round((e.detail.y - this.currentY) / xDist);
+        if (proposedY == this.currentY)
             return;
 
         // if the calculated proposed bundle is in either of the 'impossible' quadrants, just return
-        if ((proposedX > this.settledX && proposedY > this.settledY) || (proposedX < this.settledX && proposedY < this.settledY))
+        if ((proposedX > this.currentX && proposedY > this.currentY) || (proposedX < this.currentX && proposedY < this.currentY))
             return;
 
         this.setProperties({
@@ -275,9 +269,9 @@ class VisualMarkets extends PolymerElement {
         });
 
         // calculate the required trade to move from the current bundle to the proposed one
-        if (proposedX > this.settledX) {
-            const volume = proposedX - this.settledX;
-            const price = Math.round((this.settledY - proposedY) / volume);
+        if (proposedX > this.currentX) {
+            const volume = proposedX - this.currentX;
+            const price = Math.round((this.currentY - proposedY) / volume);
             this.$.bid_volume_input.value = this.$.currency_scaler.xToHumanReadable(volume);
             this.$.bid_price_input.value = this.$.currency_scaler.yToHumanReadable(price);
             
@@ -285,8 +279,8 @@ class VisualMarkets extends PolymerElement {
             this.$.ask_price_input.value = '';
         }
         else {
-            const volume = this.settledX - proposedX;
-            const price = Math.round((proposedY - this.settledY) / volume);
+            const volume = this.currentX - proposedX;
+            const price = Math.round((proposedY - this.currentY) / volume);
             this.$.ask_volume_input.value = this.$.currency_scaler.xToHumanReadable(volume);
             this.$.ask_price_input.value = this.$.currency_scaler.yToHumanReadable(price);
 
@@ -310,8 +304,8 @@ class VisualMarkets extends PolymerElement {
         }
         
         this.setProperties({
-            proposedX: this.settledX + volume,
-            proposedY: this.settledY - price * volume,
+            proposedX: this.currentX + volume,
+            proposedY: this.currentY - price * volume,
         });
     }
 
@@ -329,8 +323,8 @@ class VisualMarkets extends PolymerElement {
         }
         
         this.setProperties({
-            proposedX: this.settledX - volume,
-            proposedY: this.settledY + price * volume,
+            proposedX: this.currentX - volume,
+            proposedY: this.currentY + price * volume,
         });
     }
 

@@ -70,13 +70,6 @@ class HeatmapElement extends PolymerElement {
                     width: 100%;
                     height: 100%;
                 }
-                .thermometer-container {
-                    margin: 5px var(--axis-padding) 0 var(--axis-size);
-                    border: 1px solid black;
-                }
-                heatmap-thermometer {
-                    height: 30px;
-                }
             </style>
 
             <currency-scaler

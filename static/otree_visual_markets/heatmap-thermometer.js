@@ -19,21 +19,34 @@ class HeatmapThermometer extends PolymerElement {
                     box-sizing: border-box;
                     display: block;
                 }
-                #container {
+                .main_container {
                     position: relative;
-                    width: 100%;
-                    height: 100%;
                 }
-                #container > canvas {
+                #axis_canvas {
+                    display: block;
+                    height: 2em;
+                    width: 100%;
+                }
+                #gradient_container {
+                    position: relative;
+                    height: 30px;
+                    /* --axis-size and --axis-padding variables are inherited from heatmap-element */
+                    left: var(--axis-size);
+                    width: calc(100% - var(--axis-size) - var(--axis-padding));
+                }
+                #gradient_container > canvas {
                     position: absolute;
                     width: 100%;
                     height: 100%;
                 }
             </style>
 
-            <div id="container">
-                <canvas id="gradient_canvas"></canvas>
-                <canvas id="indicator_canvas"></canvas>
+            <div class="main_container">
+                <canvas id="axis_canvas"></canvas>
+                <div id="gradient_container">
+                    <canvas id="gradient_canvas"></canvas>
+                    <canvas id="indicator_canvas"></canvas>
+                </div>
             </div>
         `;
     }
@@ -42,6 +55,7 @@ class HeatmapThermometer extends PolymerElement {
         return [
             'drawGradient(width, height)',
             'drawIndicators(width, height, maxUtility, currentUtility, hoverUtility)',
+            'drawAxis(width, maxUtility)',
         ];
     }
 
@@ -53,17 +67,22 @@ class HeatmapThermometer extends PolymerElement {
             const height = Math.floor(containerChange.contentRect.height);
             this.setSize(width, height);
         });
-        resizeObserver.observe(this.$.container);
+        resizeObserver.observe(this.$.gradient_container);
     }
 
     setSize(width, height) {
         // we have to update this.width and this.height after waiting, since for some reason updating the canvas' widths and heights
         // doesn't happen until the next tick. changing this.width and this.height after waiting ensures that the canvases have correct
         // width and height properties when the polymer observers are triggered
-        for (const canvas of this.$.container.querySelectorAll('canvas')) {
+        for (const canvas of this.$.gradient_container.querySelectorAll('canvas')) {
             canvas.width = width;
             canvas.height = height;
         }
+
+        this.$.axis_canvas.width = this.$.axis_canvas.clientWidth;
+        this.$.axis_canvas.height = this.$.axis_canvas.clientHeight;
+
+        this.gradientLeftPadding = this.$.gradient_container.offsetLeft;
 
         setTimeout(() => {
             this.setProperties({
@@ -115,16 +134,6 @@ class HeatmapThermometer extends PolymerElement {
         const ctx = this.$.indicator_canvas.getContext('2d');
         ctx.clearRect(0, 0, width, height);
 
-        if (currentUtility !== null && typeof currentUtility !== 'undefined') {
-            const x = remap(currentUtility, 0, maxUtility, 0, width);
-            ctx.strokeStyle = 'black';
-            ctx.strokeWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
-            ctx.stroke();
-        }
-
         if (hoverUtility !== null && typeof hoverUtility !== 'undefined') {
             const x = remap(hoverUtility, 0, maxUtility, 0, width);
             ctx.strokeStyle = 'gray';
@@ -134,6 +143,67 @@ class HeatmapThermometer extends PolymerElement {
             ctx.lineTo(x, height);
             ctx.stroke();
         }
+
+        if (currentUtility !== null && typeof currentUtility !== 'undefined') {
+            const x = remap(currentUtility, 0, maxUtility, 0, width);
+            ctx.strokeStyle = 'black';
+            ctx.strokeWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+    }
+
+    getTickInterval(maxUtility) {
+        const maxNumTicks = 20;
+        for (const interval of [1, 2, 5]) {
+            if (maxUtility / interval <= maxNumTicks) return interval;
+        }
+        let interval = 10;
+        let base = 10;
+        while (true) {
+            for (let i = 0; i < 9; i++) {
+                interval += base;
+                if (maxUtility / interval <= maxNumTicks) return interval;
+            }
+            base *= 10;
+        }
+    }
+
+    displayUtility(utility) {
+        return utility
+            .toFixed(1)
+            .replace(/\.?0+$/, '');
+    }
+
+    drawAxis(gradientWidth, maxUtility) {
+        // if any arguments are undefined, just return
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const width = this.$.axis_canvas.width;
+        const height = this.$.axis_canvas.height;
+
+        const ctx = this.$.axis_canvas.getContext('2d');
+        ctx.textBaseline = 'middle'
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.beginPath();
+        ctx.moveTo(this.gradientLeftPadding, height-1);
+        ctx.lineTo(this.gradientLeftPadding+gradientWidth, height-1);
+
+        const interval = this.getTickInterval(maxUtility);
+        let curTick = 0;
+        while (curTick <= maxUtility) {
+            const curTickPixels = remap(curTick, 0, maxUtility, this.gradientLeftPadding, this.gradientLeftPadding + gradientWidth);
+            ctx.moveTo(curTickPixels, height-10);
+            ctx.lineTo(curTickPixels, height);
+            const curTickText = this.displayUtility(curTick);
+            ctx.fillText(curTickText, curTickPixels+5, height-10);
+            curTick += interval;
+        }
+
+        ctx.stroke();
     }
 }
 

@@ -223,12 +223,12 @@ class VisualMarkets extends PolymerElement {
         this.pcode = this.$.constants.participantCode;
 
         this.orderFormat = order => {
-            const price = this.$.currency_scaler.yToHumanReadable(order.price);
+            const price = this.priceToHumanReadable(order.price);
             const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
             return `${volume} @ $${price}`;
         };
         this.tradeFormat = (making_order, taking_order) => {
-            const price = this.$.currency_scaler.yToHumanReadable(making_order.price);
+            const price = this.priceToHumanReadable(making_order.price);
             const volume = this.$.currency_scaler.xToHumanReadable(making_order.traded_volume);
             return `${volume} @ $${price}`;
         };
@@ -334,14 +334,14 @@ class VisualMarkets extends PolymerElement {
 
     _enter_bid() {
         let price = parseFloat(this.$.bid_price_input.value);
-        price = this.priceFromHumanReadable.yFromHumanReadable(price);
+        price = this.priceFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
         let volume = parseFloat(this.$.bid_volume_input.value);
-        volume = this.priceFromHumanReadable(volume);
+        volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
             this.$.log.error('Can\'t enter bid: invalid volume');
             return;
@@ -423,6 +423,11 @@ class VisualMarkets extends PolymerElement {
         let seconds = '' + timeRemaining%60;
         seconds = seconds.length == 1 ? '0' + seconds : seconds;
         return `${minutes}:${seconds}`;
+    }
+    priceToHumanReadable(price) {
+        // price is in units Y per unit X, so scaling has to respect that
+        const factor = this.$.currency_scaler.yScale / this.$.currency_scaler.xScale;
+        return price / factor;
     }
     priceFromHumanReadable(price) {
         // price is in units Y per unit X, so scaling has to respect that

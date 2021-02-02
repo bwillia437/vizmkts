@@ -33,6 +33,12 @@ class FilteredTradeList extends TradeList {
                     text-align: center;
                     margin: 3px;
                 }
+                .bid {
+                    background-color: #ffb3b3;
+                }
+                .ask {
+                    background-color: #c6ffb3;
+                }
             </style>
 
             <otree-constants
@@ -42,7 +48,7 @@ class FilteredTradeList extends TradeList {
             <div id="container">
                 <template is="dom-repeat" items="{{ filterTrades(trades.*, limitNum, showOwnOnly) }}" as="trade" filter="{{_getAssetFilterFunc(assetName)}}">
                     <template is="dom-repeat" items="{{trade.making_orders}}" as="making_order">
-                        <div>
+                        <div class$="[[ getCellClass(making_order, trade.taking_order) ]]">
                             <span>[[displayFormat(making_order, trade.taking_order)]]</span>
                         </div>
                     </template>
@@ -55,6 +61,24 @@ class FilteredTradeList extends TradeList {
         super.ready();
         this.pcode = this.$.constants.participantCode;
     }
+
+    getCellClass(making, taking) {
+        if (this.pcode == taking.pcode){
+            if (taking.is_bid) {
+                return 'bid'
+            } else{
+                return 'ask'
+            }
+        }
+        if (this.pcode == making.pcode){
+            if (making.is_bid){
+                return 'bid'
+            } else{
+                return 'ask'
+            }
+        }
+
+    }         
 
     filterTrades(tradesChange, limitNum, showOwnOnly) {
         // given a trade, return true if the current player participated in that trade

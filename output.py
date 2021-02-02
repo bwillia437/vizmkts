@@ -68,8 +68,8 @@ class AllocationCsvGenerator(BaseCSVMarketOutputGenerator):
         for trade in trades:
             taking_order = trade.taking_order
             for making_order in trade.making_orders.all():
-                price = making_order.price
-                volume = making_order.traded_volume
+                price = (making_order.price)/(config.y_currency_scale/config.x_currency_scale)
+                volume = (making_order.traded_volume)/(config.x_currency_scale)
                 if (making_order.pcode in str(player_data.keys())):
                     # print('Making order is: ', making_order.pcode, )
                     if (making_order.is_bid):
@@ -83,7 +83,7 @@ class AllocationCsvGenerator(BaseCSVMarketOutputGenerator):
                 if (taking_order.pcode in str(player_data.keys())):
                     if (taking_order.is_bid):
                         player_data[taking_order.pcode][0] += volume
-                        player_data[making_order.pcode][1]-= price*volume
+                        player_data[taking_order.pcode][1]-= price*volume
                     else: 
                         player_data[taking_order.pcode][0] -= volume
                         player_data[taking_order.pcode][1]+= price*volume

@@ -99,7 +99,7 @@ class UtilityGrid extends PolymerElement {
     displayUtilityFunction(x, y) {
         // return a string with the utility value for x and y, with a maximum of 2 decimal points
         return this.utilityFunction(x, y)
-            .toFixed(2)
+            .toFixed(1)
             .replace(/\.?0+$/, '');
     }
 

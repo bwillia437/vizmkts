@@ -2,7 +2,7 @@ import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polyme
 import './lib/marchingsquares.js';
 import './heatmap-thermometer.js';
 import './currency_scaler.js';
-import { remap, clamp } from './utils.js';
+import { remap, clamp, lerp } from './utils.js';
 
 /**
  * `heatmap-element`
@@ -107,7 +107,10 @@ class HeatmapElement extends PolymerElement {
             colorScheme: {
                 type: Array,
                 value: () => [
-                    [255, 255, 255],
+                    [0, 0, 200],
+                    [60, 200, 80],
+                    [220, 220, 30],
+                    [220, 190, 100],
                     [255, 0, 0],
                 ],
             },
@@ -386,7 +389,7 @@ class HeatmapElement extends PolymerElement {
         const low_index = Math.floor(percent)
         const high_index = Math.ceil(percent)
         percent = percent - low_index
-        return [0, 1, 2].map(i => percent * scheme[high_index][i] + (1 - percent) * scheme[low_index][i])
+        return [0, 1, 2].map(i => lerp(scheme[low_index][i], scheme[high_index][i], percent));
     }
 
     /**

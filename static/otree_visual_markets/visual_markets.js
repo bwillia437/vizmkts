@@ -373,11 +373,10 @@ class VisualMarkets extends PolymerElement {
         const order = event.detail;
 
         this.$.modal.modal_text = 'Are you sure you want to remove this order?';
-        this.$.modal.on_close_callback = (accepted) => {
-            if (!accepted)
-                return;
-
-            this.$.trader_state.cancel_order(order);
+        this.$.modal.buttons = ['No', 'Yes'];
+        this.$.modal.on_close_callback = (button_index) => {
+            if (button_index == 1)
+                this.$.trader_state.cancel_order(order);
         };
         this.$.modal.show();
     }
@@ -392,11 +391,10 @@ class VisualMarkets extends PolymerElement {
         const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
 
         this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${volume} units for $${price}?`
-        this.$.modal.on_close_callback = (accepted) => {
-            if (!accepted)
-                return;
-
-            this.$.trader_state.accept_order(order);
+        this.$.modal.buttons = ['No', 'Yes'];
+        this.$.modal.on_close_callback = (button_index) => {
+            if (button_index == 1)
+                this.$.trader_state.accept_order(order);
         };
         this.$.modal.show();
     }
@@ -421,7 +419,7 @@ class VisualMarkets extends PolymerElement {
     formatTimeRemaining(timeRemaining) {
         const minutes = Math.floor(timeRemaining/60);
         let seconds = '' + timeRemaining%60;
-        seconds = seconds.length == 1 ? '0' + seconds : seconds;
+        if (seconds.length == 1) seconds = '0' + seconds;
         return `${minutes}:${seconds}`;
     }
     priceToHumanReadable(price) {

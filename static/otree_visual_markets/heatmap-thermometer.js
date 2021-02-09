@@ -1,5 +1,5 @@
 import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polymer/polymer/polymer-element.js';
-import { remap, clamp } from './utils.js';
+import { remap, clamp, lerp } from './utils.js';
 
 class HeatmapThermometer extends PolymerElement {
 
@@ -99,7 +99,7 @@ class HeatmapThermometer extends PolymerElement {
         const low_index = Math.floor(percent)
         const high_index = Math.ceil(percent)
         percent = percent - low_index
-        return [0, 1, 2].map(i => percent * scheme[high_index][i] + (1 - percent) * scheme[low_index][i])
+        return [0, 1, 2].map(i => lerp(scheme[low_index][i], scheme[high_index][i], percent));
     }
 
     drawGradient(width, height) {

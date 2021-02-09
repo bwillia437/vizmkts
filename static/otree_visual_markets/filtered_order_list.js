@@ -43,6 +43,12 @@ class FilteredOrderList extends OrderList {
                 .other-order .cancel-button {
                     display: none;
                 }
+                .bid {
+                    background-color: #ffb3b3;
+                }
+                .ask {
+                    background-color: #c6ffb3;
+                }
             </style>
 
             <otree-constants
@@ -51,13 +57,25 @@ class FilteredOrderList extends OrderList {
 
             <div id="container">
                 <template is="dom-repeat" items="{{ filterOrders(orders.*, limitNum) }}" filter="{{_getAssetFilterFunc(assetName)}}">
-                    <div on-dblclick="_acceptOrder" class$="[[_getOrderClass(item)]]">
+                    <div on-dblclick="_acceptOrder" class$="[[ getCellClass(orders) ]]">
                         <span>[[displayFormat(item)]]</span>
                         <span class="cancel-button" on-click="_cancelOrder">&#9746;</span>
                     </div>
                 </template>
             </div>
         `;
+    }
+
+    getCellClass(orders){
+        if (this.pcode == orders[0].pcode){
+            if (orders[0].is_bid){
+                return 'bid'
+            } else {
+                return 'ask'
+            }
+        }
+        return ''
+
     }
 
     filterOrders(ordersChange, limitNum) {

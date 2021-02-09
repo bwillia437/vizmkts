@@ -65,13 +65,9 @@ class FilteredTradeList extends TradeList {
         const trades = tradesChange.base;
         if (typeof trades === 'undefined') return;
 
-        const filtered_trades = [];
-        for (const trade of trades) {
-            if (showOwnOnly && !player_participated(trade)) continue;
-            filtered_trades.push(trade);
-            if (limitNum > 0 && filtered_trades.length >= limitNum) break;
-        }
-        return filtered_trades
+        return trades.filter((trade, i) => {
+            return player_participated(trade) || limitNum == 0 || i < limitNum;
+        });
     }
 
 }

@@ -2,6 +2,7 @@ import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polyme
 import '/static/otree-redwood/node_modules/@polymer/polymer/lib/elements/dom-if.js';
 import '/static/otree-redwood/src/redwood-channel/redwood-channel.js';
 import '/static/otree-redwood/src/otree-constants/otree-constants.js';
+import '/static/otree-redwood/src/redwood-period/redwood-period.js';
 
 import '/static/otree_markets/trader_state.js'
 import '/static/otree_markets/simple_modal.js';
@@ -14,7 +15,7 @@ import './filtered_trade_list.js';
 import './utility-grid.js';
 
 class VisualMarkets extends PolymerElement {
-
+    
     static get properties() {
         return {
             utilityFunctionString: String,
@@ -22,6 +23,8 @@ class VisualMarkets extends PolymerElement {
                 type: Object,
                 computed: 'computeUtilityFunction(utilityFunctionString)',
             },
+            initialX: Number,
+            initialY: Number,
             maxUtility: Number,
             xBounds: Array,
             yBounds: Array,
@@ -62,6 +65,10 @@ class VisualMarkets extends PolymerElement {
             <otree-constants
                 id="constants"
             ></otree-constants>
+            <redwood-period
+                on-period-end="_periodEnd"
+                running="{{running}}"
+            ></redwood-period>
             <trader-state
                 id="trader_state"
                 bids="{{bids}}"
@@ -98,7 +105,7 @@ class VisualMarkets extends PolymerElement {
                                         <div class ="pricevolumeinput" style="width: 90%;
                                         height: 30;">
                                             <label for="bid_price_input">Price: </label>
-                                            <input id="bid_price_input" type="number" min="0" >
+                                            <input id="bid_price_input" type="number" min="0">
                                         </div>
                                         <div class ="pricevolumeinput" style="width:90%">
                                             <label for="bid_volume_input">Qty: </label>
@@ -186,33 +193,41 @@ class VisualMarkets extends PolymerElement {
                         
 
                     </div>
-                    <template is="dom-if" if="{{ heatmapEnabled }}">
-                        <div class="heatmap-cell">
-                            <heatmap-element
-                                id="heatmap"
-                                utility-function="[[ utilityFunction ]]"
-                                x-bounds="[[ xBounds ]]"
-                                y-bounds="[[ yBounds ]]"
-                                current-x="[[ currentX ]]"
-                                current-y="[[ currentY ]]"
-                                max-utility="[[ maxUtility ]]"
-                                proposed-x="[[ proposedX ]]"
-                                proposed-y="[[ proposedY ]]"
-                                on-heatmap-click="onHeatmapClick"
-                            ></heatmap-element>
+                    <div class="right-side">
+                        <div id="results">
+                            <div><span>Initial X</span><span>[[ xToHumanReadable(initialX) ]]</span></div>
+                            <div><span>Final X</span><span>[[ xToHumanReadable(currentX) ]]</span></div>
+                            <div><span>Initial Y</span><span>[[ yToHumanReadable(initialY) ]]</span></div>
+                            <div><span>Final Y</span><span>[[ yToHumanReadable(currentY) ]]</span></div>
                         </div>
-                    </template>
-                    <template is="dom-if" if="{{ !heatmapEnabled }}">
-                        <div class="grid-cell">
-                            <utility-grid
-                                utility-function="[[ utilityFunction ]]"
-                                current-x="[[ currentX ]]"
-                                current-y="[[ currentY ]]"
-                                x-bounds="[[ xBounds ]]"
-                                y-bounds="[[ yBounds ]]"
-                            ></utility-grid>
-                        </div>
-                    </template>
+                        <template is="dom-if" if="{{ heatmapEnabled }}">
+                            <div class="heatmap-cell">
+                                <heatmap-element
+                                    id="heatmap"
+                                    utility-function="[[ utilityFunction ]]"
+                                    x-bounds="[[ xBounds ]]"
+                                    y-bounds="[[ yBounds ]]"
+                                    current-x="[[ currentX ]]"
+                                    current-y="[[ currentY ]]"
+                                    max-utility="[[ maxUtility ]]"
+                                    proposed-x="[[ proposedX ]]"
+                                    proposed-y="[[ proposedY ]]"
+                                    on-heatmap-click="onHeatmapClick"
+                                ></heatmap-element>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{ !heatmapEnabled }}">
+                            <div class="grid-cell">
+                                <utility-grid
+                                    utility-function="[[ utilityFunction ]]"
+                                    current-x="[[ currentX ]]"
+                                    current-y="[[ currentY ]]"
+                                    x-bounds="[[ xBounds ]]"
+                                    y-bounds="[[ yBounds ]]"
+                                ></utility-grid>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         `;
@@ -402,6 +417,10 @@ class VisualMarkets extends PolymerElement {
     _onError(event) {
         const message = event.detail;
         this.$.log.error(message);
+    }
+
+    _periodEnd(_event) {
+        this.$.results.style.display = "initial";
     }
 
     xToHumanReadable(a) {

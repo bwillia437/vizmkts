@@ -8,7 +8,6 @@
 {% block scripts %}
     <script type="module" src="/static/otree_visual_markets/visual_markets.js"></script>
     <script type="module" src="/static/otree_visual_markets/currency_scaler.js"></script>
-    <script type="module" src="/static/otree_markets/disable_interface_overlay.js"></script>
 {% endblock %}
 
 {% block styles %}
@@ -22,9 +21,6 @@
 
 {% block content %}
 
-    <disable-interface-overlay
-    ></disable-interface-overlay>
-
     <currency-scaler
         x-scale="{{ config.x_currency_scale }}"
         y-scale="{{ config.y_currency_scale }}"
@@ -32,6 +28,8 @@
 
     <!-- note that x_bounds and y_bounds here are the scaled bounds from vars_for_template, not the bounds from the config -->
     <visual-markets
+        initial-x="{{ player.asset_endowment }}"
+        initial-y="{{ player.cash_endowment }}"
         x-bounds="{{ x_bounds }}"
         y-bounds="{{ y_bounds }}"
         max-utility="{{ config.max_utility }}"

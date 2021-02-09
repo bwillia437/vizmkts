@@ -33,10 +33,10 @@ class FilteredTradeList extends TradeList {
                     text-align: center;
                     margin: 3px;
                 }
-                .bid {
+                .my-bid {
                     background-color: #ffb3b3;
                 }
-                .ask {
+                .my-ask {
                     background-color: #c6ffb3;
                 }
             </style>
@@ -65,22 +65,24 @@ class FilteredTradeList extends TradeList {
     getCellClass(making, taking) {
         if (this.pcode == taking.pcode){
             if (taking.is_bid) {
-                return 'bid'
+                return 'my-bid'
             } else{
-                return 'ask'
+                return 'my-ask'
             }
         }
         if (this.pcode == making.pcode){
             if (making.is_bid){
-                return 'bid'
+                return 'my-bid'
             } else{
-                return 'ask'
+                return 'my-ask'
             }
         }
-
     }         
 
     filterTrades(tradesChange, limitNum, showOwnOnly) {
+
+
+
         // given a trade, return true if the current player participated in that trade
         const player_participated = trade => {
             return trade.taking_order.pcode == this.pcode || trade.making_orders.some(order => order.pcode == this.pcode);

@@ -39,6 +39,10 @@ class VisualMarkets extends PolymerElement {
             showNBestOrders: Number,
             showNMostRecentTrades: Number,
             showOwnTradesOnly: Boolean,
+            sortTrades: {
+                type: Boolean,
+                value: false,
+            }
         };
     }
 
@@ -105,22 +109,27 @@ class VisualMarkets extends PolymerElement {
                                         <div class ="pricevolumeinput" style="width: 90%;
                                         height: 30;">
                                             <label for="bid_price_input">Price: </label>
-                                            <input id="bid_price_input" type="number" min="0">
+                                            <input id="bid_price_input" type="number" min="0" disabled="{{!running}}">
                                         </div>
                                         <div class ="pricevolumeinput" style="width:90%">
                                             <label for="bid_volume_input">Qty: </label>
-                                            <input id="bid_volume_input" type="number" min="1" >
+                                            <input id="bid_volume_input" type="number" min="1" disabled="{{!running}}">
                                         </div>
                                     </div>
                                     <div>
-                                        <button type="button" on-click="_enter_bid" style = "background: #E01936;" >Bid</button>
+                                        <button type="button" on-click="_enter_bid" style = "background: #E01936;" disabled="{{!running}}">Bid</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="list-cell" style= "border-radius: 5px;border: 2px solid grey; 
                             outline-offset: 0px;">
                                 <div class="Title" style= "background-color: grey;">
-                                    <h3>Trades</h3>
+                                    <h3>Trades
+                                    <template is="dom-if" if="{{!running}}">
+                                        <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
+                                        <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
+                                    </template>
+                                    </h3>
                                 </div>
                                 <filtered-trade-list
                                     class="flex-fill"
@@ -128,6 +137,7 @@ class VisualMarkets extends PolymerElement {
                                     display-format="[[tradeFormat]]"
                                     limit-num="[[showNMostRecentTrades]]"
                                     show-own-only="[[showOwnTradesOnly]]"
+                                    sort-trades="[[sortTrades]]"
                                 ></filtered-trade-list>
                             </div>
                             <div class="list-cell" style= "border-radius: 5px;border: 2px solid green; 
@@ -147,15 +157,15 @@ class VisualMarkets extends PolymerElement {
                                     <div on-input="_updateProposedBundleAsk">
                                     <div class ="pricevolumeinput" style="width: 90%; height: 30;">
                                             <label for="ask_price_input">Price: </label>
-                                            <input id="ask_price_input" type="number" min="0">
+                                            <input id="ask_price_input" type="number" min="0" disabled="{{!running}}">
                                         </div>
                                         <div class ="pricevolumeinput" style="width:90%">
                                             <label for="ask_volume_input">Qty: </label>
-                                            <input id="ask_volume_input" type="number" min="1">
+                                            <input id="ask_volume_input" type="number" min="1" disabled="{{!running}}">
                                         </div>
                                     </div>
                                     <div>
-                                        <button type="button" on-click="_enter_ask" style = "background: #09C206;">Ask</button>
+                                        <button type="button" on-click="_enter_ask" style = "background: #09C206;" disabled="{{!running}}">Ask</button>
                                     </div>
                                 </div>
                             </div>
@@ -195,10 +205,31 @@ class VisualMarkets extends PolymerElement {
                     </div>
                     <div class="right-side">
                         <div id="results">
-                            <div><span>Initial X</span><span>[[ xToHumanReadable(initialX) ]]</span></div>
-                            <div><span>Final X</span><span>[[ xToHumanReadable(currentX) ]]</span></div>
-                            <div><span>Initial Y</span><span>[[ yToHumanReadable(initialY) ]]</span></div>
-                            <div><span>Final Y</span><span>[[ yToHumanReadable(currentY) ]]</span></div>
+                            <!--<div>
+                                <span><strong>Final Allocation:</span></strong>
+                                <div style="margin-left:5px">
+                                    <span>[[ xToHumanReadable(currentX) ]]x &nbsp [[ yToHumanReadable(currentY) ]]y &nbsp [[ displayUtilityFunction(currentX, currentY) ]]util</span>
+                                </div>
+                            </div>                           
+                            <div>
+                                <span><strong>Initial Allocation:</span></strong>
+                                <div style="margin-left:5px;">
+                                    <span>[[ xToHumanReadable(initialX) ]]x &nbsp [[ yToHumanReadable(initialY) ]]y &nbsp [[ displayUtilityFunction(initialX, initialY) ]]util</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span><strong>Gains:</span></strong>
+                                <div style="margin-left:5px">
+                                    <span>...</span>
+                                </div>
+                            </div> -->
+                            <div><span><strong>Initial X:</span></strong><span>[[ xToHumanReadable(initialX) ]]</span> </div>
+                            <div><span><strong>Final X:</span></strong><span>[[ xToHumanReadable(currentX) ]]</span></div>
+                            <div><span><strong>Initial Y:</span></strong><span>[[ yToHumanReadable(initialY) ]]</span></div>
+                            <div><span><strong>Final Y:</span></strong><span>[[ yToHumanReadable(currentY) ]]</span></div>
+                            <div><span><strong>Initial Utility:</span></strong><span>[[ displayUtilityFunction(initialX, initialY) ]]</span></div>
+                            <div><span><strong>Final Utility:</span></strong><span>[[ displayUtilityFunction(currentX, currentY) ]]</span></div>
+                            <div><span><strong>Gains:</span></strong><span> [[ computeGain(initialX, initialY, currentX, currentY) ]]</span></div>
                         </div>
                         <template is="dom-if" if="{{ heatmapEnabled }}">
                             <div class="heatmap-cell">
@@ -248,15 +279,33 @@ class VisualMarkets extends PolymerElement {
             return `${volume} @ $${price}`;
         };
     }
+
     
     computeUtilityFunction(utilityFunctionString) {
-        const unscaled_utility = new Function('x', 'y', 'return ' + utilityFunctionString);
+        var unscaled_utility = new Function('x', 'y', 'return ' + utilityFunctionString);
         return (x, y) => {
             return unscaled_utility(
                 this.$.currency_scaler.xToHumanReadable(x),
                 this.$.currency_scaler.yToHumanReadable(y)
             );
         }
+    }
+
+    computeGain(initialX, initialY, currentX, currentY){
+        // computes the gains for each round
+        let gain = this.utilityFunction(currentX, currentY) - this.utilityFunction(initialX, initialY);
+        return gain.toFixed(2)
+        .replace(/\.?0+$/, '');
+    }
+
+    sort(event) {
+        // if the checkbox is checked then sortTrades should be true,
+        // otherwise, it is false
+        if (event.target.checked == true){
+            this.sortTrades = true
+          } else {
+            this.sortTrades = false
+          }
     }
 
     onHeatmapClick(e) {

@@ -43,38 +43,6 @@ class Group(markets_models.Group):
     def period_length(self):
         return self.subsession.config.period_length
 
-    # def _on_enter_event(self, event):
-    #     '''handle an enter message sent from the frontend
-        
-    #     if the order is valid and can be entered, first cancel all of this player's other active orders on the same side.
-    #     this ensures that players can only ever have one active order of each type.
-    #     '''
-    #     enter_msg = event.value
-    #     asset_name = markets_models.SINGLE_ASSET_NAME
-
-    #     player = self.get_player(enter_msg['pcode'])
-    #     if player.check_available(enter_msg['is_bid'], enter_msg['price'], enter_msg['volume'], asset_name):
-    #         self.try_cancel_active_order(enter_msg['pcode'], enter_msg['is_bid'])
-        
-    #     super()._on_enter_event(event)
-    
-    # def _on_accept_event(self, event):
-    #     '''handle an accept message sent from the frontend
-        
-    #     if the order can be accepted, first cancel all of this player's other active orders on the same side as the pseudo-order they're entering with their accept.
-    #     this ensures that players can only ever have one active order of each type.
-    #     '''
-    #     accepted_order_dict = event.value
-    #     asset_name = markets_models.SINGLE_ASSET_NAME
-
-    #     sender_pcode = event.participant.code
-    #     player = self.get_player(sender_pcode)
-
-    #     if player.check_available(not accepted_order_dict['is_bid'], accepted_order_dict['price'], accepted_order_dict['volume'], asset_name):
-    #         self.try_cancel_active_order(sender_pcode, not accepted_order_dict['is_bid'])
-        
-    #     super()._on_accept_event(event)
-    
     def confirm_enter(self, order):
         player = self.get_player(order.pcode)
         player.refresh_from_db()
@@ -131,33 +99,20 @@ class Group(markets_models.Group):
         super().confirm_cancel(order)
         
    
-    # def try_cancel_active_order(self, pcode, is_bid):
-    #     '''try to cancel active orders owned by players with pcode `pcode`, of type `is_bid` and in the
-    #     '''
-    #     exchange = self.exchanges.get()
-    #     try:
-    #         old_order = exchange.orders.get(pcode=pcode, is_bid=is_bid, status=OrderStatusEnum.ACTIVE)
-    #     except Order.DoesNotExist: 
-    #         pass
-    #     else:
-    #         exchange.cancel_order(old_order.id)
-
-
 class Player(markets_models.Player):
 
     current_bid = models.ForeignKey(Order, null=True, on_delete=models.CASCADE, related_name="+")
     current_ask = models.ForeignKey(Order, null=True, on_delete=models.CASCADE, related_name="+")
 
+    @property
+    def config(self):
+        config_name = self.session.config['session_config_file']
+        return MarketConfig.get(config_name, self.round_number, self.id_in_group)
+
     def asset_endowment(self):
-        config = self.subsession.config
-        endowment = config.x_endowment
-        if isinstance(endowment, list):
-            endowment = endowment[self.id_in_group % len(endowment)]
-        return endowment * config.x_currency_scale
+        config = self.config
+        return config.x_endowment * config.x_currency_scale
     
     def cash_endowment(self):
-        config = self.subsession.config
-        endowment = config.y_endowment
-        if isinstance(endowment, list):
-            endowment = endowment[self.id_in_group % len(endowment)]
-        return endowment * config.y_currency_scale
+        config = self.config
+        return config.y_endowment * config.y_currency_scale

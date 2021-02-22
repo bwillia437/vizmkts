@@ -34,3 +34,14 @@ show_n_best_orders: 0
 show_n_most_recent_trades: 0
 # if true, show only your own trades in the trade list
 show_own_trades_only: true
+
+role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller"]
+
+role_params:
+  buyer:
+    x_endowment: 10
+    y_endowment: 20
+    utility_function: "(x ** 0.5) * (y ** 0.5)"
+  seller:
+    x_endowment: 20
+    y_endowment: 10

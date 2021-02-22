@@ -63,21 +63,30 @@ class MarketConfig():
         return cls.round_config_cache[round_config_name].entry
     
     @classmethod
-    def get(cls, session_config_name, round_number):
+    def get(cls, session_config_name, round_number, id_in_group=None):
         '''get an MarketConfig object given a specific session config name and round number'''
         session_config = cls._get_session_config(session_config_name)
         num_rounds = len(session_config)
         if round_number > num_rounds:
-            return cls(num_rounds, None)
+            return cls(num_rounds, None, id_in_group)
         round_config_name = session_config[round_number-1]
         round_config = cls._get_round_config(round_config_name)
-        return cls(num_rounds, round_config)
+        return cls(num_rounds, round_config, id_in_group)
 
-    def __init__(self, num_rounds, round_data):
+    def __init__(self, num_rounds, round_data, id_in_group):
         self.num_rounds = num_rounds
         self.round_data = round_data
+        self.role = None
+        if id_in_group is not None and 'role_assignments' in round_data and id_in_group <= len(round_data['role_assignments']):
+            self.role = round_data['role_assignments'][id_in_group-1]
         
     def __getattr__(self, field):
+        if self.role is not None and 'role_params' in self.round_data:
+            role_params = self.round_data['role_params'][self.role]
+            if field in role_params:
+                return role_params[field]
+
         if field not in self.round_data:
             raise ValueError(f'invalid round config: field "{field}" is missing')
+
         return self.round_data[field]

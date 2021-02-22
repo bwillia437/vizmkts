@@ -412,6 +412,11 @@ class VisualMarkets extends PolymerElement {
         }
 
         this.$.trader_state.enter_order(price, volume, true);
+
+        this.setProperties({
+            proposedX: null,
+            proposedY: null,
+        });
     }
 
     _enter_ask() {
@@ -430,6 +435,11 @@ class VisualMarkets extends PolymerElement {
         }
 
         this.$.trader_state.enter_order(price, volume, false);
+
+        this.setProperties({
+            proposedX: null,
+            proposedY: null,
+        });
     }
 
     // triggered when this player cancels an order

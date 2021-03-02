@@ -42,6 +42,9 @@ class Group(markets_models.Group):
 
     def period_length(self):
         return self.subsession.config.period_length
+    
+    def post_round_delay(self):
+        return self.subsession.config.post_round_delay
 
     def confirm_enter(self, order):
         player = self.get_player(order.pcode)

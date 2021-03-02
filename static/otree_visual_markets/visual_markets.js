@@ -42,7 +42,11 @@ class VisualMarkets extends PolymerElement {
             sortTrades: {
                 type: Boolean,
                 value: false,
-            }
+            },
+            isFinished: { // only after the period has finished
+                type: Boolean,
+                value: false,
+            },
         };
     }
 
@@ -125,7 +129,7 @@ class VisualMarkets extends PolymerElement {
                             outline-offset: 0px;">
                                 <div class="Title" style= "background-color: grey;">
                                     <h3>Trades
-                                    <template is="dom-if" if="{{!running}}">
+                                    <template is="dom-if" if="{{periodFinished}}">
                                         <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
                                         <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
                                     </template>
@@ -205,24 +209,6 @@ class VisualMarkets extends PolymerElement {
                     </div>
                     <div class="right-side">
                         <div id="results">
-                            <!--<div>
-                                <span><strong>Final Allocation:</span></strong>
-                                <div style="margin-left:5px">
-                                    <span>[[ xToHumanReadable(currentX) ]]x &nbsp [[ yToHumanReadable(currentY) ]]y &nbsp [[ displayUtilityFunction(currentX, currentY) ]]util</span>
-                                </div>
-                            </div>                           
-                            <div>
-                                <span><strong>Initial Allocation:</span></strong>
-                                <div style="margin-left:5px;">
-                                    <span>[[ xToHumanReadable(initialX) ]]x &nbsp [[ yToHumanReadable(initialY) ]]y &nbsp [[ displayUtilityFunction(initialX, initialY) ]]util</span>
-                                </div>
-                            </div>
-                            <div>
-                                <span><strong>Gains:</span></strong>
-                                <div style="margin-left:5px">
-                                    <span>...</span>
-                                </div>
-                            </div> -->
                             <div><span><strong>Initial X:</span></strong><span>[[ xToHumanReadable(initialX) ]]</span> </div>
                             <div><span><strong>Final X:</span></strong><span>[[ xToHumanReadable(currentX) ]]</span></div>
                             <div><span><strong>Initial Y:</span></strong><span>[[ yToHumanReadable(initialY) ]]</span></div>
@@ -480,6 +466,7 @@ class VisualMarkets extends PolymerElement {
 
     _periodEnd(_event) {
         this.$.results.style.display = "initial";
+        this.isFinished = true;
     }
 
     xToHumanReadable(a) {

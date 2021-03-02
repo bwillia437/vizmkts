@@ -33,10 +33,14 @@ show_n_best_orders: 0
 # this number determines the number of trades to display in the list. if it's 0, then all trades are shown.
 show_n_most_recent_trades: 0
 # if true, show only your own trades in the trade list
-show_own_trades_only: true
+show_own_trades_only: false
 
+# this field determines how each player will be assigne a role. this array should be the same length as the number
+# of players in a group. players are assigned a role from this array based on their id_in_group
 role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller"]
 
+# this field determines role-specific overrides for config params. if a role is specified, any config params specified for it
+# will override the params specified above
 role_params:
   buyer:
     x_endowment: 10

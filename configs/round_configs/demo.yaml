@@ -37,6 +37,11 @@ show_n_most_recent_trades: 0
 # if true, show only your own trades in the trade list
 show_own_trades_only: false
 
+# this config field enables partial equilibrium treatment on heatmap
+# adds vertical lines at integer values of X and draws hashmarks where these lines intersect the current indifference curve
+# IMPORTANT: when using this treatment, x_currency_scale should be set to 1, or heatmap will not behave as expected
+use_partial_equilibrium: true
+
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
 role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller"]

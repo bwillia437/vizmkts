@@ -93,6 +93,7 @@ class HeatmapElement extends PolymerElement {
                         <canvas id="heatmap_canvas"></canvas>
                         <canvas id="hover_curve_canvas"></canvas>
                         <canvas id="current_bundle_canvas"></canvas>
+                        <canvas id="order_canvas"></canvas>
                         <canvas id="proposed_bundle_canvas"></canvas>
                     </div>
                     <canvas id="x_scale"></canvas>
@@ -123,7 +124,10 @@ class HeatmapElement extends PolymerElement {
             yBounds: Array,
             currentX: Number,
             currentY: Number,
+            currentBid: Object,
+            currentAsk: Object,
             maxUtility: Number,
+            usePartialEquilibrium: Boolean,
             hoverUtility: {
                 type: Number,
                 computed: 'calcHoverUtility(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height)',
@@ -140,17 +144,18 @@ class HeatmapElement extends PolymerElement {
             },
             quadTree: {
                 type: Object,
-                computed: 'computeQuadTree(_quadTreeGridSize, utilityFunction, xBounds, yBounds, width, height)',
+                computed: 'computeQuadTree(utilityFunction, xBounds, yBounds, width, height)',
             }
         }
     }
 
     static get observers() {
         return [
-            'drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height)',
+            'drawHeatmap(utilityFunction, usePartialEquilibrium, xBounds, yBounds, maxUtility, width, height)',
             'drawHoverCurve(hoverUtility, width, height, quadTree)',
-            'drawCurrentBundle(currentX, currentY, currentUtility, xBounds, yBounds, width, height, quadTree)',
+            'drawCurrentBundle(currentX, currentY, usePartialEquilibrium, currentUtility, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
+            'drawOrders(currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height)',
             'drawXAxis(xBounds, axisSize, axisPadding, width, height)',
             'drawYAxis(yBounds, axisSize, axisPadding, width, height)',
         ]
@@ -210,6 +215,9 @@ class HeatmapElement extends PolymerElement {
             ctx.beginPath();
             for (let i = 0; i < path.length; i++) {
                 let [x, y] = path[i];
+                // convert x and y returned by isoLines to screen space positions
+                // right out of isoLines, the values returned are positions relative to the grid defined by _quadTreeGridSize
+                // need to account for that, as well as the padding added in computeQuadTree
                 x = -gridSize + x*gridSize;
                 y = -gridSize + y*gridSize;
                 if (i == 0) {
@@ -279,6 +287,9 @@ class HeatmapElement extends PolymerElement {
         }));
     }
 
+    /**
+     * Calculate the utility value currently being hovered over with the mouse
+     */
     calcHoverUtility(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
@@ -312,6 +323,9 @@ class HeatmapElement extends PolymerElement {
         this.drawIndifferenceCurve(hoverUtility, ctx, quadTree);
     }
 
+    /**
+     *  Calculate the players current utility value given their current X and Y holdings 
+     */
     calcCurrentUtility(currentX, currentY, utilityFunction, xBounds, yBounds) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
@@ -320,11 +334,10 @@ class HeatmapElement extends PolymerElement {
             return null;
         }
 
-        // draw indifference curve for current bundle
         return utilityFunction(currentX, currentY);
     }
 
-    drawCurrentBundle(currentX, currentY, currentUtility, xBounds, yBounds, width, height, quadTree) {
+    drawCurrentBundle(currentX, currentY, usePartialEquilibrium, currentUtility, xBounds, yBounds, width, height, quadTree) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
@@ -354,6 +367,56 @@ class HeatmapElement extends PolymerElement {
         ctx.fillStyle = 'yellow';
         ctx.fill();
         ctx.stroke();
+
+        if (usePartialEquilibrium) {
+            this.drawPartialEquilibriumHashes(ctx, currentX, xBounds, width, currentUtility, quadTree);
+        }
+    }
+
+    /**
+     * Draw hash marks everywhere the player's current indifference curve intersects a line x = c where c is an integer
+     */
+    drawPartialEquilibriumHashes(ctx, currentX, xBounds, width, currentUtility, quadTree) {
+        ctx.save();
+
+        const gridSize = this._quadTreeGridSize;
+        const paths = MarchingSquaresJS.isoLines(quadTree, currentUtility, {noFrame: true});
+        ctx.lineWidth = 4;
+
+        for (const path of paths) {
+            // for each line segment in the indifference curve
+            for (let i = 1; i < path.length; i++) {
+                // prevX/Y and curX/Y are the start and end points of this line segment
+                let [curX, curY] = path[i];
+                curX = -gridSize + curX*gridSize;
+                curY = -gridSize + curY*gridSize;
+
+                let [prevX, prevY] = path[i-1];
+                prevX = -gridSize + prevX*gridSize;
+                prevY = -gridSize + prevY*gridSize;
+
+                // map current and previous X values from screen space to asset space
+                const curXAsset = remap(curX, 0, width, xBounds[0], xBounds[1]);
+                const prevXAsset = remap(prevX, 0, width, xBounds[0], xBounds[1]);
+                // if the leftmost endpoint's X value and the rightmost endpoint's X value straddle an integer value of X
+                if (Math.ceil(Math.min(curXAsset, prevXAsset)) == Math.floor(Math.max(curXAsset, prevXAsset))) {
+                    const xIntersectionPointAsset = Math.ceil(Math.min(curXAsset, prevXAsset));
+
+                    if (xIntersectionPointAsset == currentX) continue;
+                    else if (xIntersectionPointAsset < currentX) ctx.strokeStyle = 'lightgreen';
+                    else if (xIntersectionPointAsset > currentX) ctx.strokeStyle = 'pink';
+
+                    const xIntersectionPoint = remap(xIntersectionPointAsset, xBounds[0], xBounds[1], 0, width);
+                    const yIntersectionPoint = remap(xIntersectionPoint, prevX, curX, prevY, curY);
+                    ctx.beginPath();
+                    ctx.moveTo(xIntersectionPoint - 5, yIntersectionPoint);
+                    ctx.lineTo(xIntersectionPoint + 5, yIntersectionPoint)
+                    ctx.stroke();
+                }
+            }
+        }
+
+        ctx.restore();
     }
 
     drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height) {
@@ -373,6 +436,41 @@ class HeatmapElement extends PolymerElement {
         ctx.fillStyle = 'orange';
         ctx.fill();
         ctx.stroke();
+    }
+
+    drawOrders(currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height) {
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const ctx = this.$.order_canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+
+        if (currentBid) {
+            const x = currentX + currentBid.volume;
+            const y = currentY - currentBid.price * currentBid.volume;
+
+            const screenX = remap(x, xBounds[0], xBounds[1], 0, width);
+            const screenY = remap(y, yBounds[1], yBounds[0], 0, height);
+
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+            ctx.fillStyle = '#ffb3b3';
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        if (currentAsk) {
+            const x = currentX - currentAsk.volume;
+            const y = currentY + currentAsk.price * currentAsk.volume;
+
+            const screenX = remap(x, xBounds[0], xBounds[1], 0, width);
+            const screenY = remap(y, yBounds[1], yBounds[0], 0, height);
+
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+            ctx.fillStyle = '#c6ffb3';
+            ctx.fill();
+            ctx.stroke();
+        }
     }
 
     /**
@@ -395,7 +493,7 @@ class HeatmapElement extends PolymerElement {
     /**
      * Generate the heatmap
      */
-    drawHeatmap(utilityFunction, xBounds, yBounds, maxUtility, width, height) {
+    drawHeatmap(utilityFunction, usePartialEquilibrium, xBounds, yBounds, maxUtility, width, height) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
@@ -424,6 +522,21 @@ class HeatmapElement extends PolymerElement {
 
         // Display heatmap
         ctx.putImageData(imageData, 0, 0);
+
+        if (usePartialEquilibrium) {
+            this.drawXLines(ctx, xBounds, width, height);
+        }
+    }
+
+    drawXLines(ctx, xBounds, width, height) {
+        ctx.strokeStyle = 'gray';
+        ctx.beginPath();
+        for (let x = xBounds[0]; x <= xBounds[1]; x++) {
+            const screenX = remap(x, xBounds[0], xBounds[1], 0, width);
+            ctx.moveTo(screenX, 0);
+            ctx.lineTo(screenX, height);
+        }
+        ctx.stroke();
     }
 
     // get an appropriate tick interval for an x or y axis given the bounds of that axis
@@ -503,11 +616,14 @@ class HeatmapElement extends PolymerElement {
         ctx.stroke();
     }
 
-    computeQuadTree(gridSize, utilityFunction, xBounds, yBounds, width, height) {
+    computeQuadTree(utilityFunction, xBounds, yBounds, width, height) {
         // if any arguments are undefined, just return
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
+        const gridSize = this._quadTreeGridSize;
         const data = [];
+        // evaluate utility across full width and height, in increments of gridSize
+        // add 2 * gridSize to width and height for some padding, so the grid always extends past the edges of the canvas
         for (let row = -gridSize; row < height+2*gridSize; row += gridSize) {
             data.push([]);
             for (let col = -gridSize; col < width+2*gridSize; col += gridSize) {

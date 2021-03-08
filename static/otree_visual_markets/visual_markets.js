@@ -31,6 +31,14 @@ class VisualMarkets extends PolymerElement {
             bids: Array,
             asks: Array,
             trades: Array,
+            currentBid: {
+                type: Object,
+                value: null,
+            },
+            currentAsk: {
+                type: Object,
+                value: null,
+            },
             currentX: Number,
             currentY: Number,
             proposedX: Number,
@@ -39,6 +47,7 @@ class VisualMarkets extends PolymerElement {
             showNBestOrders: Number,
             showNMostRecentTrades: Number,
             showOwnTradesOnly: Boolean,
+            usePartialEquilibrium: Boolean,
             sortTrades: {
                 type: Boolean,
                 value: false,
@@ -86,6 +95,9 @@ class VisualMarkets extends PolymerElement {
                 settled-cash="{{currentY}}"
                 time-remaining="{{timeRemaining}}"
                 on-error="_onError"
+                on-confirm-order-enter="_confirmOrderEntered"
+                on-confirm-order-cancel="_confirmOrderCanceled"
+                on-confirm-trade="_confirmTrade"
             ></trader-state>
 
             <div class="full-width">
@@ -226,9 +238,12 @@ class VisualMarkets extends PolymerElement {
                                     y-bounds="[[ yBounds ]]"
                                     current-x="[[ currentX ]]"
                                     current-y="[[ currentY ]]"
+                                    current-bid="[[ currentBid ]]"
+                                    current-ask="[[ currentAsk ]]"
                                     max-utility="[[ maxUtility ]]"
                                     proposed-x="[[ proposedX ]]"
                                     proposed-y="[[ proposedY ]]"
+                                    use-partial-equilibrium="[[ usePartialEquilibrium ]]"
                                     on-heatmap-click="onHeatmapClick"
                                 ></heatmap-element>
                             </div>
@@ -264,9 +279,19 @@ class VisualMarkets extends PolymerElement {
             const volume = this.$.currency_scaler.xToHumanReadable(making_order.traded_volume);
             return `${volume} @ $${price}`;
         };
+
+        for (let bid of this.bids) {
+            if (bid.pcode == this.pcode) {
+                this.set('currentBid', bid);
+            }
+        }
+        for (let ask of this.asks) {
+            if (ask.pcode == this.pcode) {
+                this.set('currentAsk', ask);
+            }
+        }
     }
 
-    
     computeUtilityFunction(utilityFunctionString) {
         var unscaled_utility = new Function('x', 'y', 'return ' + utilityFunctionString);
         return (x, y) => {
@@ -462,6 +487,45 @@ class VisualMarkets extends PolymerElement {
     _onError(event) {
         const message = event.detail;
         this.$.log.error(message);
+    }
+
+    _confirmOrderEntered(event) {
+        const order = event.detail;
+        console.log(order)
+        if (order.pcode == this.pcode) {
+            if (order.is_bid) {
+                this.set('currentBid', order);
+            }
+            else {
+                this.set('currentAsk', order);
+            }
+        }
+    }
+
+    _confirmOrderCanceled(event) {
+        const order = event.detail;
+        if (order.pcode == this.pcode) {
+            if (order.is_bid) {
+                this.set('currentBid', null);
+            }
+            else {
+                this.set('currentAsk', null);
+            }
+        }
+    }
+
+    _confirmTrade(event) {
+        const trade = event.detail;
+        for (const order of trade.making_orders.concat([trade.taking_order])) {
+            if (order.pcode == this.pcode) {
+                if (order.is_bid) {
+                    this.set('currentBid', null);
+                }
+                else {
+                    this.set('currentAsk', null);
+                }
+            }
+        }
     }
 
     _periodEnd(_event) {

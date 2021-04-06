@@ -222,13 +222,26 @@ class VisualMarkets extends PolymerElement {
                     </div>
                     <div class="right-side">
                         <div id="results">
-                            <div><span><strong>Initial X:</span></strong><span>[[ xToHumanReadable(initialX) ]]</span> </div>
-                            <div><span><strong>Final X:</span></strong><span>[[ xToHumanReadable(currentX) ]]</span></div>
-                            <div><span><strong>Initial Y:</span></strong><span>[[ yToHumanReadable(initialY) ]]</span></div>
-                            <div><span><strong>Final Y:</span></strong><span>[[ yToHumanReadable(currentY) ]]</span></div>
-                            <div><span><strong>Initial Utility:</span></strong><span>[[ displayUtilityFunction(initialX, initialY) ]]</span></div>
-                            <div><span><strong>Final Utility:</span></strong><span>[[ displayUtilityFunction(currentX, currentY) ]]</span></div>
-                            <div><span><strong>Gains:</span></strong><span> [[ computeGain(initialX, initialY, currentX, currentY) ]]</span></div>
+                            <div>
+                                <span><strong>Final Allocation:</span></strong>
+                                <div>
+                                    <span>[[ xToHumanReadable(currentX) ]]x &nbsp [[ yToHumanReadable(currentY) ]]y &nbsp [[ displayUtilityFunction(currentX, currentY) ]]&Uscr; </span>
+                                </div>
+                            </div>
+                            <br />
+                            <div>
+                                <span><strong>Initial Allocation:</span></strong>
+                                <div>
+                                    <span>[[ xToHumanReadable(initialX) ]]x &nbsp [[ yToHumanReadable(initialY) ]]y &nbsp [[ displayUtilityFunction(initialX, initialY) ]]&Uscr; </span>
+                                </div>
+                            </div>
+                            <br />
+                            <div>
+                                <span><strong>Gains:</span></strong>
+                                <div>
+                                    <span> [[ computeGain(initialX, initialY, currentX, currentY) ]]&Uscr; </span>
+                                </div>
+                            </div>
                         </div>
                         <template is="dom-if" if="{{ heatmapEnabled }}">
                             <div class="heatmap-cell">

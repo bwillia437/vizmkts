@@ -49,11 +49,14 @@ h3 {
     top: 50%;
     left: 50%;
     transform: translate(-75%, -45%);
-    padding:10px;
+    background:#e1e1e1;
+    margin: 0 auto;
     z-index: 1;
-    background-color: lightgray;
-    border: 2px solid black;
-    border-radius: 5px;
+    padding:20px;
+    -webkit-box-shadow:0 0 10px rgba(0,0,0,0.4);
+    -moz-box-shadow:0 0 10px rgba(0,0,0,0.4);
+    box-shadow:0 0 10px rgba(0,0,0,0.4);
+    border-radius: 3px;
     /* text-align: center; */
 }
 
@@ -148,25 +151,25 @@ filtered-order-list, filtered-trade-list, heatmap-element {
     margin-right:10px;
 }
 
-.pricevolumeinput{ 
+.pricevolumeinput{
     text-align: center;
-    margin: 10px;  
+    margin: 10px;
     display: table;
     border-radius: 2px;
     border: 1px solid grey;
     justify-content: center;
-    align-items: center;                
+    align-items: center;
 }
 
 .infoboxcell{
     text-align: center;
-    margin: auto;  
+    margin: auto;
     width:100%;
     display: table;
     border-radius: 2px;
     border: 1px solid grey;
     justify-content: center;
-    align-items: center;     
+    align-items: center;
 }
 .infoboxrow{
     margin-left: 10px;
@@ -177,7 +180,7 @@ filtered-order-list, filtered-trade-list, heatmap-element {
     border-radius: 2px;
     border: 1px solid grey;
     justify-content: center;
-    align-items: center;     
+    align-items: center;
 }
 
 label {
@@ -186,9 +189,10 @@ label {
     border-right: 1px solid grey;
     border-left: 1px solid white;
     border:1;
-    -webkit-box-shadow: inset 3px 3px 25px 35px #EBEBEB; 
+    -webkit-box-shadow: inset 3px 3px 25px 35px #EBEBEB;
     box-shadow: inset 3px 3px 25px 35px #EBEBEB;
     display: table-cell;
+    width: 25%
 }
 
 span {
@@ -209,7 +213,7 @@ button{
     color: #fff !important;
     text-transform: uppercase;
     text-decoration: none;
-    
+
     padding: 6px;
     border-radius: 5px;
     display: flex;

@@ -48,6 +48,7 @@ class VisualMarkets extends PolymerElement {
             showNMostRecentTrades: Number,
             showOwnTradesOnly: Boolean,
             usePartialEquilibrium: Boolean,
+            showMarketOnHeatmap: Boolean,
             sortTrades: {
                 type: Boolean,
                 value: false,
@@ -59,7 +60,7 @@ class VisualMarkets extends PolymerElement {
         };
     }
 
-    // override attribute deseralization to make the way booleans work a little more intuitive
+    // override attribute deserialization to make the way booleans work a little more intuitive
     // change it so that a nonexistent attribute or an attribute of "false" deserializes to false
     // and everything else deserializes to true. this makes passing booleans in from the template a lot easier.
     _deserializeValue(value, type) {
@@ -240,10 +241,13 @@ class VisualMarkets extends PolymerElement {
                                     current-y="[[ currentY ]]"
                                     current-bid="[[ currentBid ]]"
                                     current-ask="[[ currentAsk ]]"
+                                    bids="[[ bids ]]"
+                                    asks="[[ asks ]]"
                                     max-utility="[[ maxUtility ]]"
                                     proposed-x="[[ proposedX ]]"
                                     proposed-y="[[ proposedY ]]"
                                     use-partial-equilibrium="[[ usePartialEquilibrium ]]"
+                                    show-market-on-heatmap="[[ showMarketOnHeatmap ]]"
                                     on-heatmap-click="onHeatmapClick"
                                 ></heatmap-element>
                             </div>
@@ -491,7 +495,6 @@ class VisualMarkets extends PolymerElement {
 
     _confirmOrderEntered(event) {
         const order = event.detail;
-        console.log(order)
         if (order.pcode == this.pcode) {
             if (order.is_bid) {
                 this.set('currentBid', order);

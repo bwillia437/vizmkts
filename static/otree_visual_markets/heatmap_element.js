@@ -1,4 +1,5 @@
 import { html, PolymerElement } from '/static/otree-redwood/node_modules/@polymer/polymer/polymer-element.js';
+import '/static/otree-redwood/src/otree-constants/otree-constants.js';
 import './lib/marchingsquares.js';
 import './heatmap-thermometer.js';
 import './currency_scaler.js';
@@ -72,6 +73,9 @@ class HeatmapElement extends PolymerElement {
                 }
             </style>
 
+            <otree-constants
+                id="constants"
+            ></otree-constants>
             <currency-scaler
                 id="currency_scaler"
             ></currency-scaler>
@@ -126,8 +130,11 @@ class HeatmapElement extends PolymerElement {
             currentY: Number,
             currentBid: Object,
             currentAsk: Object,
+            bids: Array,
+            asks: Array,
             maxUtility: Number,
             usePartialEquilibrium: Boolean,
+            showMarketOnHeatmap: Boolean,
             hoverUtility: {
                 type: Number,
                 computed: 'calcHoverUtility(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height)',
@@ -155,7 +162,7 @@ class HeatmapElement extends PolymerElement {
             'drawHoverCurve(hoverUtility, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, usePartialEquilibrium, currentUtility, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
-            'drawOrders(currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height)',
+            'drawOrders(bids.splices, asks.splices, currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height)',
             'drawXAxis(xBounds, axisSize, axisPadding, width, height)',
             'drawYAxis(yBounds, axisSize, axisPadding, width, height)',
         ]
@@ -163,6 +170,7 @@ class HeatmapElement extends PolymerElement {
 
     ready() {
         super.ready();
+        this.pcode = this.$.constants.participantCode;
         const resizeObserver = new ResizeObserver(entries => {
             const containerChange = entries[0];
             const width = Math.floor(containerChange.contentRect.width);
@@ -364,9 +372,8 @@ class HeatmapElement extends PolymerElement {
         // draw circle centered at current bundle
         ctx.beginPath();
         ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = 'black';
         ctx.fill();
-        ctx.stroke();
 
         if (usePartialEquilibrium) {
             this.drawPartialEquilibriumHashes(ctx, currentX, xBounds, width, currentUtility, quadTree);
@@ -438,12 +445,11 @@ class HeatmapElement extends PolymerElement {
         ctx.stroke();
     }
 
-    drawOrders(currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height) {
-        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
-
-        const ctx = this.$.order_canvas.getContext('2d');
-        ctx.clearRect(0, 0, width, height);
-
+    /*
+        draw this player's current bid and ask if they exist
+    */
+    drawCurrentOrders(ctx, currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height) {
+        ctx.save();
         if (currentBid) {
             const x = currentX + currentBid.volume;
             const y = currentY - currentBid.price * currentBid.volume;
@@ -471,6 +477,100 @@ class HeatmapElement extends PolymerElement {
             ctx.fill();
             ctx.stroke();
         }
+        ctx.restore();
+    }
+
+    /*
+        draws the order book as a segmented line representing what your bundle would be if you accepted
+        each order currently in the book. also draw a circle representing each order
+    */
+    drawMarket(ctx, bids, asks, currentX, currentY, xBounds, yBounds, width, height) {
+        ctx.save();
+        let x, y;
+
+        // performs a given drawing context operation in asset space by converting
+        // x and y to screen space and passing arguments through
+        const ctxOpInAssetSpace = (op, x, y, ...rest) => {
+            const screenX = remap(x, xBounds[0], xBounds[1], 0, width);
+            const screenY = remap(y, yBounds[0], yBounds[1], height, 0);
+            op.bind(ctx)(screenX, screenY, ...rest);
+        };
+
+        // draw segmented line connecting orders
+        // have to do this first so that order circles are drawn on top
+        ctx.beginPath();
+        x = currentX;
+        y = currentY;
+        ctxOpInAssetSpace(ctx.moveTo, x, y);
+        for (const bid of bids) {
+            if (bid.pcode == this.pcode) continue;
+
+            x -= bid.volume;
+            y += bid.price * bid.volume;
+            ctxOpInAssetSpace(ctx.lineTo, x, y);
+        }
+        ctx.stroke();
+
+        // draw circles for each order
+        x = currentX;
+        y = currentY;
+        ctx.fillStyle = 'red';
+        for (const bid of bids) {
+            if (bid.pcode == this.pcode) continue;
+
+            x -= bid.volume;
+            y += bid.price * bid.volume;
+            ctx.beginPath();
+            ctxOpInAssetSpace(ctx.arc, x, y, 5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // repeat for asks
+        ctx.beginPath();
+        x = currentX;
+        y = currentY;
+        ctxOpInAssetSpace(ctx.moveTo, x, y);
+        for (const ask of asks) {
+            if (ask.pcode == this.pcode) continue;
+
+            x += ask.volume;
+            y -= ask.price * ask.volume;
+            ctxOpInAssetSpace(ctx.lineTo, x, y);
+        }
+        ctx.stroke();
+
+        x = currentX;
+        y = currentY;
+        ctx.fillStyle = 'green';
+        for (const bid of asks) {
+            if (bid.pcode == this.pcode) continue;
+
+            x += bid.volume;
+            y -= bid.price * bid.volume;
+            ctx.beginPath();
+            ctxOpInAssetSpace(ctx.arc, x, y, 5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    drawOrders(_bidSplices, _askSplices, currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height) {
+        const requiredProperties = [currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height];
+        if (requiredProperties.some(e => typeof e === 'undefined')) return;
+
+        const ctx = this.$.order_canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+
+        if (this.showMarketOnHeatmap) {
+            const bids = this.get('bids');
+            const asks = this.get('asks');
+
+            this.drawMarket(ctx, bids, asks, currentX, currentY, xBounds, yBounds, width, height);
+        }
+        this.drawCurrentOrders(ctx, currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height);
     }
 
     /**

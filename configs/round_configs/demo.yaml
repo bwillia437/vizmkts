@@ -42,6 +42,10 @@ show_own_trades_only: false
 # IMPORTANT: when using this treatment, x_currency_scale should be set to 1, or heatmap will not behave as expected
 use_partial_equilibrium: false
 
+# this config field enables the visual order book. this displays the order book as a segmented line extending from
+# the player's current bundle
+show_market_on_heatmap: true
+
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
 role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller"]
@@ -54,5 +58,5 @@ role_params:
     y_endowment: 20
     utility_function: "(x ** 0.5) * (y ** 0.5)"
   seller:
-    x_endowment: 20
+    x_endowment: 15
     y_endowment: 10

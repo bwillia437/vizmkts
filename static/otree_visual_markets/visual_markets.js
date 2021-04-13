@@ -126,11 +126,11 @@ class VisualMarkets extends PolymerElement {
                                         <div class ="pricevolumeinput" style="width: 90%;
                                         height: 30;">
                                             <label for="bid_price_input">Price: </label>
-                                            <input id="bid_price_input" type="number" min="0" disabled="{{!running}}">
+                                            <input id="bid_price_input" type="number" min="0" disabled = "[[checkDisabled(running)]]">
                                         </div>
                                         <div class ="pricevolumeinput" style="width:90%">
                                             <label for="bid_volume_input">Qty: </label>
-                                            <input id="bid_volume_input" type="number" min="1" disabled="{{!running}}">
+                                            <input id="bid_volume_input" type="number" min="1" disabled = "[[checkDisabled(running)]]">
                                         </div>
                                     </div>
                                     <div>
@@ -142,7 +142,7 @@ class VisualMarkets extends PolymerElement {
                             outline-offset: 0px;">
                                 <div class="Title" style= "background-color: grey;">
                                     <h3>Trades
-                                    <template is="dom-if" if="{{periodFinished}}">
+                                    <template is="dom-if" if="{{isFinished}}">
                                         <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
                                         <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
                                     </template>
@@ -174,11 +174,11 @@ class VisualMarkets extends PolymerElement {
                                     <div on-input="_updateProposedBundleAsk">
                                     <div class ="pricevolumeinput" style="width: 90%; height: 30;">
                                             <label for="ask_price_input">Price: </label>
-                                            <input id="ask_price_input" type="number" min="0" disabled="{{!running}}">
+                                            <input id="ask_price_input" type="number" min="0" disabled = "[[checkDisabled(running)]]">
                                         </div>
                                         <div class ="pricevolumeinput" style="width:90%">
                                             <label for="ask_volume_input">Qty: </label>
-                                            <input id="ask_volume_input" type="number" min="1" disabled="{{!running}}">
+                                            <input id="ask_volume_input" type="number" min="1" disabled = "[[checkDisabled(running)]]">
                                         </div>
                                     </div>
                                     <div>
@@ -317,6 +317,13 @@ class VisualMarkets extends PolymerElement {
                 this.$.currency_scaler.yToHumanReadable(y)
             );
         }
+    }
+
+    checkDisabled(running){
+        if (!this.running || this.showMarketOnHeatmap){
+            return true
+        }
+        return false
     }
 
     computeGain(initialX, initialY, currentX, currentY){

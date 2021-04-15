@@ -10,17 +10,17 @@ x_endowment: 20
 # scaling for x asset
 x_currency_scale: 10
 # heatmap bounds for x asset
-x_bounds: [0, 100]
+x_bounds: [0, 50]
 
 # starting y (cash) endowment for each player
 y_endowment: 20
 # scaling for y asset
 y_currency_scale: 1000
 # heatmap bounds for y asset
-y_bounds: [0, 100]
+y_bounds: [0, 50]
 
 utility_function: "(x ** 0.5) * (y ** 0.5)"
-max_utility: 100
+max_utility: 50
 
 # the length of the round in seconds
 period_length: null

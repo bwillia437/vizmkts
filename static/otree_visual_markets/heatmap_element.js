@@ -5,6 +5,9 @@ import './heatmap-thermometer.js';
 import './currency_scaler.js';
 import { remap, clamp, lerp } from './utils.js';
 
+// radius of all circles representing bundles (current bundle, proposed bundle, current orders etc.)
+const BUNDLE_CIRCLE_RADIUS = 7;
+
 /**
  * `heatmap-element`
  * heatmap for oTree Visual Markets
@@ -371,7 +374,7 @@ class HeatmapElement extends PolymerElement {
 
         // draw circle centered at current bundle
         ctx.beginPath();
-        ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+        ctx.arc(screenX, screenY, BUNDLE_CIRCLE_RADIUS, 0, 2*Math.PI);
         ctx.fillStyle = 'black';
         ctx.fill();
 
@@ -439,8 +442,9 @@ class HeatmapElement extends PolymerElement {
         const screenY = remap(proposedY, yBounds[1], yBounds[0], 0, height);
 
         ctx.beginPath();
-        ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+        ctx.arc(screenX, screenY, BUNDLE_CIRCLE_RADIUS, 0, 2*Math.PI);
         ctx.fillStyle = 'orange';
+        ctx.lineWidth = 2;
         ctx.fill();
         ctx.stroke();
     }
@@ -450,6 +454,8 @@ class HeatmapElement extends PolymerElement {
     */
     drawCurrentOrders(ctx, currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height) {
         ctx.save();
+        ctx.lineWidth = 2;
+
         if (currentBid) {
             const x = currentX + currentBid.volume;
             const y = currentY - currentBid.price * currentBid.volume;
@@ -458,8 +464,9 @@ class HeatmapElement extends PolymerElement {
             const screenY = remap(y, yBounds[1], yBounds[0], 0, height);
 
             ctx.beginPath();
-            ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+            ctx.arc(screenX, screenY, BUNDLE_CIRCLE_RADIUS, 0, 2*Math.PI);
             ctx.fillStyle = '#ffb3b3';
+            ctx.lineWidth = 2;
             ctx.fill();
             ctx.stroke();
         }
@@ -472,7 +479,7 @@ class HeatmapElement extends PolymerElement {
             const screenY = remap(y, yBounds[1], yBounds[0], 0, height);
 
             ctx.beginPath();
-            ctx.arc(screenX, screenY, 5, 0, 2*Math.PI);
+            ctx.arc(screenX, screenY, BUNDLE_CIRCLE_RADIUS, 0, 2*Math.PI);
             ctx.fillStyle = '#c6ffb3';
             ctx.fill();
             ctx.stroke();
@@ -486,6 +493,7 @@ class HeatmapElement extends PolymerElement {
     */
     drawMarket(ctx, bids, asks, currentX, currentY, xBounds, yBounds, width, height) {
         ctx.save();
+        ctx.lineWidth = 2;
         let x, y;
 
         // performs a given drawing context operation in asset space by converting
@@ -514,14 +522,14 @@ class HeatmapElement extends PolymerElement {
         // draw circles for each order
         x = currentX;
         y = currentY;
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = 'green';
         for (const bid of bids) {
             if (bid.pcode == this.pcode) continue;
 
             x -= bid.volume;
             y += bid.price * bid.volume;
             ctx.beginPath();
-            ctxOpInAssetSpace(ctx.arc, x, y, 5, 0, Math.PI*2);
+            ctxOpInAssetSpace(ctx.arc, x, y, BUNDLE_CIRCLE_RADIUS, 0, Math.PI*2);
             ctx.fill();
             ctx.stroke();
         }
@@ -542,14 +550,14 @@ class HeatmapElement extends PolymerElement {
 
         x = currentX;
         y = currentY;
-        ctx.fillStyle = 'green';
+        ctx.fillStyle = 'red';
         for (const bid of asks) {
             if (bid.pcode == this.pcode) continue;
 
             x += bid.volume;
             y -= bid.price * bid.volume;
             ctx.beginPath();
-            ctxOpInAssetSpace(ctx.arc, x, y, 5, 0, Math.PI*2);
+            ctxOpInAssetSpace(ctx.arc, x, y, BUNDLE_CIRCLE_RADIUS, 0, Math.PI*2);
             ctx.fill();
             ctx.stroke();
         }
@@ -669,6 +677,7 @@ class HeatmapElement extends PolymerElement {
 
         const ctx = this.$.x_scale.getContext('2d');
         ctx.textBaseline = 'top'
+        ctx.font = '15px sans-serif';
         ctx.beginPath();
         ctx.moveTo(axisSize-1, 1);
         ctx.lineTo(width-axisPadding, 1);
@@ -678,7 +687,7 @@ class HeatmapElement extends PolymerElement {
         while (curTick <= xBounds[1]) {
             const curTickPixels = remap(curTick, xBounds[0], xBounds[1], axisSize-1, width-axisPadding);
             ctx.moveTo(curTickPixels, 1);
-            ctx.lineTo(curTickPixels, 10);
+            ctx.lineTo(curTickPixels, 20);
             const curTickText = this.$.currency_scaler.xToHumanReadable(curTick)
             ctx.fillText(curTickText, curTickPixels + 5, 5)
             curTick += interval;
@@ -698,6 +707,7 @@ class HeatmapElement extends PolymerElement {
 
         const ctx = this.$.y_scale.getContext('2d');
         ctx.textAlign = 'right';
+        ctx.font = '15px sans-serif';
         ctx.beginPath();
         ctx.moveTo(width-1, axisPadding);
         ctx.lineTo(width-1, height-axisSize+1);
@@ -707,7 +717,7 @@ class HeatmapElement extends PolymerElement {
         while (curTick <= yBounds[1]) {
             const curTickPixels = remap(curTick, yBounds[0], yBounds[1], height-axisSize+1, axisPadding);
             ctx.moveTo(width, curTickPixels);
-            ctx.lineTo(width - 10, curTickPixels);
+            ctx.lineTo(width - 20, curTickPixels);
             const curTickText = this.$.currency_scaler.yToHumanReadable(curTick)
             ctx.fillText(curTickText, width-5, curTickPixels - 5)
             curTick += interval;

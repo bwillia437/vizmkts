@@ -186,6 +186,7 @@ class HeatmapThermometer extends PolymerElement {
 
         const ctx = this.$.axis_canvas.getContext('2d');
         ctx.textBaseline = 'middle'
+        ctx.font = '15px sans-serif';
         ctx.clearRect(0, 0, width, height);
 
         ctx.beginPath();
@@ -196,7 +197,7 @@ class HeatmapThermometer extends PolymerElement {
         let curTick = 0;
         while (curTick <= maxUtility) {
             const curTickPixels = remap(curTick, 0, maxUtility, this.gradientLeftPadding, this.gradientLeftPadding + gradientWidth);
-            ctx.moveTo(curTickPixels, height-10);
+            ctx.moveTo(curTickPixels, height-20);
             ctx.lineTo(curTickPixels, height);
             const curTickText = this.displayUtility(curTick);
             ctx.fillText(curTickText, curTickPixels+5, height-10);

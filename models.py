@@ -119,3 +119,12 @@ class Player(markets_models.Player):
     def cash_endowment(self):
         config = self.config
         return config.y_endowment * config.y_currency_scale
+
+    def check_available(self, is_bid, price, volume, asset_name):
+        '''since each player can only ever have one order entered at a time, we ignore available holdings
+        when determining whether an order can be entered'''
+        if is_bid and self.settled_cash < price * volume:
+            return False
+        elif not is_bid and self.settled_assets[asset_name] < volume:
+            return False
+        return True

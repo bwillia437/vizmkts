@@ -4,7 +4,6 @@ from otree.api import (
 from otree_markets import models as markets_models
 from otree_markets.exchange.base import Order, OrderStatusEnum
 from .configmanager import MarketConfig
-import math
 import itertools
 
 
@@ -45,6 +44,25 @@ class Group(markets_models.Group):
     
     def post_round_delay(self):
         return self.subsession.config.post_round_delay
+
+    def _on_enter_event(self, event):
+        # get_end_time returns a timestamp if the round has ended and None otherwise
+        if self.get_end_time():
+            print('warning: a player attempted to enter an order after the round ended')
+            return
+        return super()._on_enter_event(event)
+    
+    def _on_accept_event(self, event):
+        if self.get_end_time():
+            print('warning: a player attempted to accept an order after the round ended')
+            return
+        return super()._on_accept_event(event)
+    
+    def _on_cancel_event(self, event):
+        if self.get_end_time():
+            print('warning: a player attempted to cancel an order after the round ended')
+            return
+        return super()._on_cancel_event(event)
 
     def confirm_enter(self, order):
         player = self.get_player(order.pcode)

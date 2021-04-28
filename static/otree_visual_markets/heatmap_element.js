@@ -286,6 +286,21 @@ class HeatmapElement extends PolymerElement {
         const screenX = e.clientX - boundingRect.left;
         const screenY = e.clientY - boundingRect.top;
 
+        if (this.showMarketOnHeatmap) {
+            const clickedOrderOrNull = this.checkForOrderClick(screenX, screenY);
+            if (clickedOrderOrNull) {
+                const order = clickedOrderOrNull;
+                if (order.pcode != this.pcode) {
+                    this.dispatchEvent(new CustomEvent('order-click', {
+                        detail: order,
+                        bubbles: true,
+                        composed: true
+                    }));
+                    return;
+                }
+            }
+        }
+
         let x =  remap(screenX, 0, this.width, this.xBounds[0], this.xBounds[1]);
         x = clamp(Math.round(x), this.xBounds[0], this.xBounds[1]);
         let y = remap(screenY, 0, this.height, this.yBounds[1], this.yBounds[0]);
@@ -296,6 +311,38 @@ class HeatmapElement extends PolymerElement {
             bubbles: true,
             composed: true
         }));
+    }
+
+    /*
+        This method takes an x and y location in screen space representing a click location and
+        returns an order object if the click was close to an order, null otherwise
+    */
+    checkForOrderClick(x, y) {
+        const bids = this.get('bids');
+        for (let order of bids) {
+            const orderAssetX = this.currentX - order.volume;
+            const orderAssetY = this.currentY + order.price * order.volume;
+            const orderScreenX = remap(orderAssetX, this.xBounds[0], this.xBounds[1], 0, this.width);
+            const orderScreenY = remap(orderAssetY, this.yBounds[1], this.yBounds[0], 0, this.height);
+
+            const dist = Math.hypot(orderScreenX - x, orderScreenY - y);
+            if (dist < BUNDLE_CIRCLE_RADIUS + 1)
+                return order;
+        }
+
+        const asks = this.get('asks');
+        for (let order of asks) {
+            const orderAssetX = this.currentX + order.volume;
+            const orderAssetY = this.currentY - order.price * order.volume;
+            const orderScreenX = remap(orderAssetX, this.xBounds[0], this.xBounds[1], 0, this.width);
+            const orderScreenY = remap(orderAssetY, this.yBounds[1], this.yBounds[0], 0, this.height);
+
+            const dist = Math.hypot(orderScreenX - x, orderScreenY - y);
+            if (dist < BUNDLE_CIRCLE_RADIUS + 1)
+                return order;
+        }
+
+        return null;
     }
 
     /**

@@ -262,6 +262,7 @@ class VisualMarkets extends PolymerElement {
                                     use-partial-equilibrium="[[ usePartialEquilibrium ]]"
                                     show-market-on-heatmap="[[ showMarketOnHeatmap ]]"
                                     on-heatmap-click="onHeatmapClick"
+                                    on-order-click="_order_accepted"
                                 ></heatmap-element>
                             </div>
                         </template>

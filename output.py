@@ -43,10 +43,8 @@ class AllocationCsvGenerator(BaseCSVMarketOutputGenerator):
 
         player_data = {}
 
-        for player_number in range(len(group.get_players())):
-            player_data[group.get_players()[player_number].participant.code] = [config.x_endowment, config.y_endowment]
-
-        # print(player_data)
+        for player in group.get_players():
+            player_data[player.participant.code] = [player.config.x_endowment, player.config.y_endowment]
 
         x = list(player_data)
 

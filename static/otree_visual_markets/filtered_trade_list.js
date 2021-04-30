@@ -50,12 +50,10 @@ class FilteredTradeList extends TradeList {
             ></otree-constants>
 
             <div id="container">
-                <template is="dom-repeat" items="{{ filterTrades(trades.*, limitNum, showOwnOnly, sortTrades) }}" as="trade" filter="{{_getAssetFilterFunc(assetName)}}">
-                    <template is="dom-repeat" items="{{trade.making_orders}}" as="making_order">
-                        <div class$="[[ getCellClass(making_order, trade.taking_order) ]]">
-                            <span>[[displayFormat(making_order, trade.taking_order)]]</span>
-                        </div>
-                    </template>
+                <template is="dom-repeat" items="{{ filterTrades(trades.*, limitNum, showOwnOnly, sortTrades) }}" as="transaction" filter="{{_getAssetFilterFunc(assetName)}}">
+                    <div class$="[[ getCellClass(transaction.making_order, transaction.taking_order) ]]">
+                        <span>[[displayFormat(transaction.making_order, transaction.taking_order)]]</span>
+                    </div>
                 </template>
             </div>
         `;
@@ -96,13 +94,23 @@ class FilteredTradeList extends TradeList {
             return player_participated(trade) || (!showOwnOnly && (limitNum == 0 || i < limitNum));
         });
 
+        const transactions = [];
+        for (let trade of filtered_trades) {
+            for (let making_order of trade.making_orders) {
+                transactions.push({
+                    making_order: making_order,
+                    taking_order: trade.taking_order,
+                });
+            }
+        }
+
         // if sortTrades is true, sort the trades by price in decreasing order
         if (sortTrades){
-            filtered_trades.sort((a, b) => {
+            transactions.sort((a, b) => {
                 return b.making_order.price - a.making_order.price;
             });
         }
-        return filtered_trades;
+        return transactions;
     }
 
 }

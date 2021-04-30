@@ -497,7 +497,7 @@ class VisualMarkets extends PolymerElement {
         if (order.pcode == this.pcode)
             return;
 
-        const price = this.$.currency_scaler.yToHumanReadable(order.price);
+        const price = this.priceToHumanReadable(order.price);
         const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
 
         this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${volume} units for $${price}?`

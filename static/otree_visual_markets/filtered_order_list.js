@@ -81,6 +81,11 @@ class FilteredOrderList extends OrderList {
         const orders = ordersChange.base;
         if (typeof orders === 'undefined') return;
 
+        // if limitNum is -1, only show own orders
+        if (limitNum == -1) {
+            return orders.filter(order => order.pcode == this.pcode);
+        }
+
         return orders.filter((order, i) => {
             return order.pcode == this.pcode || limitNum == 0 || i < limitNum;
         });

@@ -29,8 +29,9 @@ post_round_delay: 30
 
 # whether to draw the heatmap
 heatmap_enabled: true
-# this number determines the number of orders to display in the list. if it's 0, then all orders are shown.
-# your own orders are always shown
+# this number determines the number of orders to display in the list.
+# if it's 0 then all orders are shown, if -1 then only your own orders are shown.
+# your own orders are always shown.
 show_n_best_orders: 0
 # this number determines the number of trades to display in the list. if it's 0, then all trades are shown.
 show_n_most_recent_trades: 0

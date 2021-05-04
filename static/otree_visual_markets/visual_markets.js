@@ -49,6 +49,7 @@ class VisualMarkets extends PolymerElement {
             showOwnTradesOnly: Boolean,
             usePartialEquilibrium: Boolean,
             showMarketOnHeatmap: Boolean,
+            disableInputEntry: Boolean,
             sortTrades: {
                 type: Boolean,
                 value: false,
@@ -321,7 +322,7 @@ class VisualMarkets extends PolymerElement {
     }
 
     checkDisabled(running){
-        if (!this.running || this.showMarketOnHeatmap){
+        if (!this.running || this.disableInputEntry){
             return true
         }
         return false

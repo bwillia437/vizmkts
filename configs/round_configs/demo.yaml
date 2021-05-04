@@ -46,6 +46,9 @@ use_partial_equilibrium: false
 # the player's current bundle
 show_market_on_heatmap: true
 
+# this config field disables the user input entry for price and qty.
+disable_input_entry: false
+
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
 role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller"]

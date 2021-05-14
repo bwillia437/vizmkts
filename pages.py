@@ -1,3 +1,4 @@
+from otree.api import Page
 from otree_markets.pages import BaseMarketPage
 
 class Market(BaseMarketPage):
@@ -16,4 +17,9 @@ class Market(BaseMarketPage):
             'y_bounds': y_bounds,
         }
 
-page_sequence = [Market]
+class PracticeRoundPauseScreen(Page):
+
+    def is_displayed(self):
+        return self.round_number <= self.subsession.config.num_rounds and self.subsession.config.is_practice
+
+page_sequence = [Market, PracticeRoundPauseScreen]

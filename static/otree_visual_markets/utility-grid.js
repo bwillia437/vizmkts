@@ -9,8 +9,8 @@ class UtilityGrid extends PolymerElement {
             utilityFunction: Object,
             currentX: Number,
             currentY: Number,
-            xBounds: Array,
-            yBounds: Array,
+            xBoundsGrid: Array,
+            yBoundsGrid: Array,
             numRows: {
                 type: Number,
                 value: 11,
@@ -52,22 +52,43 @@ class UtilityGrid extends PolymerElement {
                 id="currency_scaler"
             ></currency-scaler>
 
-            <div class="container">
+        <div style="text-align:center">
+            <div class="header-top">SELL</div>
+            <div class="container" >
                 <div class="col header-left">
                     <div class="header-top">Y\\X</div>
-                    <template is="dom-repeat" as="y" items="[[ range(yBounds, numRows) ]]">
+                    <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
                         <div>[[ displayY(y) ]]</div>
                     </template>
                 </div>
-                <template is="dom-repeat" as="x" items="[[ range(xBounds, numCols) ]]">
+                <template is="dom-repeat" as="x" items="[[ range(xBoundsGrid, numCols) ]]">
                     <div class="col">
                         <div class="header-top">[[ displayX(x) ]]</div>
-                        <template is="dom-repeat" as="y" items="[[ range(yBounds, numRows) ]]">
-                            <div class$="[[ getCellClass(currentX, currentY, x, y) ]]">[[ displayUtilityFunction(x, y) ]]</div>
+                        <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
+                            <div class$="[[ getCellClass(currentX, currentY, x, y) ]]">[[ displaySellUtilityFunction(x, y, currentX, currentY) ]]</div>
                         </template>
                     </div>
                 </template>
             </div>
+
+            <div class="header-top">BUY</div>
+            <div class="container">
+            <div class="col header-left">
+                <div class="header-top">Y\\X</div>
+                <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
+                    <div>[[ displayY(y) ]]</div>
+                </template>
+            </div>
+            <template is="dom-repeat" as="x" items="[[ range(xBoundsGrid, numCols) ]]">
+                <div class="col">
+                    <div class="header-top">[[ displayX(x) ]]</div>
+                    <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
+                        <div class$="[[ getCellClass(currentX, currentY, x, y) ]]">[[ displayBuyUtilityFunction(x, y, currentX, currentY) ]]</div>
+                    </template>
+                </div>
+            </template>
+        </div>
+            
         `;
     }
 
@@ -80,6 +101,7 @@ class UtilityGrid extends PolymerElement {
         const step = (bounds[1] - bounds[0]) / (divisions - 1);
         for(let i = bounds[0]; i <= bounds[1]; i += step) {
             arr.push(i);
+            console.log(i)
         }
         return arr;
     }
@@ -96,17 +118,49 @@ class UtilityGrid extends PolymerElement {
             .replace(/\.?0+$/, '');
     }
 
-    displayUtilityFunction(x, y) {
+    displaySellUtilityFunction(x, y, currentX, currentY) {
         // return a string with the utility value for x and y, with a maximum of 2 decimal points
-        return this.utilityFunction(x, y)
-            .toFixed(1)
-            .replace(/\.?0+$/, '');
+
+        // return this.utilityFunction(x, y)
+        //     .toFixed(1)
+        //     .replace(/\.?0+$/, '')
+
+        if (y==0 ||x==0){
+            return '-';
+        }
+        const newX = currentX - x;
+        const newY = currentY + ( this.$.currency_scaler.xToHumanReadable(x) * y);
+        const currUtil = this.utilityFunction(currentX, currentY);
+        const newUtil = this.utilityFunction(newX, newY);
+        const ans = newUtil - currUtil
+        if (isNaN(ans)){
+            return '-';
+        }
+        return ans.toFixed(2).replace(/\.?0+$/, '')
+
+
+    }
+    displayBuyUtilityFunction(x, y, currentX, currentY) {
+        if (y==0 || x==0){
+            return '-';
+        }       
+        const newX = currentX + x;
+        const newY = currentY- (this.$.currency_scaler.xToHumanReadable(x) * y);
+        const currUtil = this.utilityFunction(currentX, currentY);
+        const newUtil = this.utilityFunction(newX, newY);
+        const ans = newUtil - currUtil
+        if (isNaN(ans)){
+            return '-'
+        }
+        return ans.toFixed(2).replace(/\.?0+$/, '')
+
     }
 
     getCellClass(currentX, currentY, cellX, cellY) {
-        const xStep = (this.xBounds[1] - this.xBounds[0]) / (this.numCols - 1);
+        return "";
+        const xStep = (this.xBoundsGrid[1] - this.xBoundsGrid[0]) / (this.numCols - 1);
         const nearestX = Math.round(currentX / xStep) * xStep;
-        const yStep = (this.yBounds[1] - this.yBounds[0]) / (this.numRows - 1);
+        const yStep = (this.yBoundsGrid[1] - this.yBoundsGrid[0]) / (this.numRows - 1);
         const nearestY = Math.round(currentY / yStep) * yStep;
 
         if (cellX == nearestX && cellY == nearestY) {

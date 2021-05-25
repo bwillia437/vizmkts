@@ -81,6 +81,10 @@ class Group(markets_models.Group):
             player.save()
 
         super().confirm_enter(order)
+    
+    def set_payoffs(self):
+        for player in self.get_players():
+            player.set_payoff()
 
     def confirm_trade(self, trade):
         exchange = self.exchanges.get()
@@ -129,6 +133,15 @@ class Player(markets_models.Player):
     def config(self):
         config_name = self.session.config['session_config_file']
         return MarketConfig.get(config_name, self.round_number, self.id_in_group)
+    
+    def utility_function(self, x, y):
+        return eval(self.config.utility_function, {'x': x, 'y': y})
+    
+    def set_payoff(self):
+        config = self.config
+        x = self.settled_assets[markets_models.SINGLE_ASSET_NAME] / config.x_currency_scale
+        y = self.settled_cash / config.y_currency_scale
+        self.payoff = self.utility_function(x, y)
 
     def asset_endowment(self):
         config = self.config

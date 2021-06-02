@@ -101,7 +101,6 @@ class UtilityGrid extends PolymerElement {
         const step = (bounds[1] - bounds[0]) / (divisions - 1);
         for(let i = bounds[0]; i <= bounds[1]; i += step) {
             arr.push(i);
-            console.log(i)
         }
         return arr;
     }

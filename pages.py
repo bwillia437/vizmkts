@@ -1,4 +1,6 @@
+from otree.api import Page, WaitPage
 from otree_markets.pages import BaseMarketPage
+from .models import Constants
 
 class Market(BaseMarketPage):
 
@@ -20,4 +22,21 @@ class Market(BaseMarketPage):
             'y_bounds_grid': y_bounds_grid,
         }
 
-page_sequence = [Market]
+class PracticeRoundPauseScreen(Page):
+
+    def is_displayed(self):
+        return self.round_number <= self.subsession.config.num_rounds and self.subsession.config.is_practice
+
+class PostRoundWaitPage(WaitPage):
+
+    after_all_players_arrive = 'set_payoffs'
+
+    def is_displayed(self):
+        return self.round_number <= self.subsession.config.num_rounds and not self.subsession.config.is_practice
+
+class Results(Page):
+
+    def is_displayed(self):
+        return self.round_number == Constants.num_rounds
+
+page_sequence = [Market, PracticeRoundPauseScreen, PostRoundWaitPage, Results]

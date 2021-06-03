@@ -139,9 +139,18 @@ class Player(markets_models.Player):
     
     def set_payoff(self):
         config = self.config
-        x = self.settled_assets[markets_models.SINGLE_ASSET_NAME] / config.x_currency_scale
-        y = self.settled_cash / config.y_currency_scale
-        self.payoff = self.utility_function(x, y)
+
+        initial_utility = self.utility_function(config.x_endowment, config.y_endowment)
+        current_x = self.settled_assets[markets_models.SINGLE_ASSET_NAME] / config.x_currency_scale
+        current_y = self.settled_cash / config.y_currency_scale
+        current_utility = self.utility_function(current_x, current_y)
+
+        initial_payoff = initial_utility * config.payoff_initial_multiplier
+        gains_payoff = (current_utility - initial_utility) * config.payoff_gain_multiplier
+        self.payoff = (initial_payoff + gains_payoff) * 1000
+    
+    def get_unscaled_payoff(self):
+        return float(self.payoff) / 1000
 
     def asset_endowment(self):
         config = self.config

@@ -38,5 +38,10 @@ class Results(Page):
 
     def is_displayed(self):
         return self.round_number == Constants.num_rounds
+    
+    def vars_for_template(self):
+        return {
+            'total_unscaled_payoff': float(self.player.participant.payoff) / 1000
+        }
 
 page_sequence = [Market, PracticeRoundPauseScreen, PostRoundWaitPage, Results]

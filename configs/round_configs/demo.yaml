@@ -28,7 +28,7 @@ period_length: null
 post_round_delay: 30
 
 # whether to draw the heatmap
-heatmap_enabled: false
+heatmap_enabled: true
 
 # utility grid x and y bounds. These will be the bounds if the heatmap_enabled is false
 x_bounds_grid: [0,3]
@@ -40,7 +40,7 @@ y_bounds_grid: [0,3]
 # your own orders are always shown.
 show_n_best_orders: 0
 # this number determines the number of trades to display in the list. if it's 0, then all trades are shown.
-show_n_most_recent_trades: 0
+show_n_most_recent_trades: 2
 # if true, show only your own trades in the trade list
 show_own_trades_only: false
 

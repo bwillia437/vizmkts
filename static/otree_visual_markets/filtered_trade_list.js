@@ -85,22 +85,20 @@ class FilteredTradeList extends TradeList {
         const trades = tradesChange.base;
         if (typeof trades === 'undefined') return;
 
-        // given a trade, return true if the current player participated in that trade
-        const player_participated = trade => {
-            return trade.taking_order.pcode == this.pcode || trade.making_orders.some(order => order.pcode == this.pcode);
-        };
-
-        const filtered_trades = trades.filter((trade, i) => {
-            return player_participated(trade) || (!showOwnOnly && (limitNum == 0 || i < limitNum));
-        });
-
         const transactions = [];
-        for (let trade of filtered_trades) {
+        let i = 0;
+        for (let trade of trades) {
             for (let making_order of trade.making_orders) {
-                transactions.push({
-                    making_order: making_order,
-                    taking_order: trade.taking_order,
-                });
+                if (making_order.pcode == this.pcode ||
+                    trade.taking_order.pcode == this.pcode ||
+                    ((!showOwnOnly && (limitNum == 0 || i < limitNum)))) {
+
+                    transactions.push({
+                        making_order: making_order,
+                        taking_order: trade.taking_order,
+                    });
+                }
+                i++;
             }
         }
 

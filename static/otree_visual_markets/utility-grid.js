@@ -11,6 +11,9 @@ class UtilityGrid extends PolymerElement {
             currentY: Number,
             xBoundsGrid: Array,
             yBoundsGrid: Array,
+            xBounds: Array,
+            yBounds: Array,
+            staticGridEnabled: Boolean,
             numRows: {
                 type: Number,
                 value: 11,
@@ -51,10 +54,50 @@ class UtilityGrid extends PolymerElement {
             <currency-scaler
                 id="currency_scaler"
             ></currency-scaler>
+        
+        <template is="dom-if" if= "{{staticGridEnabled}}">
+            <div style="text-align:center">
+                <div class="header-top">Static Utility Grid</div>
+                <div class="container" >
+                    <div class="col header-left">
+                            <div class="header-top">Y\\X</div>
+                            <template is="dom-repeat" as="y" items="[[ range(yBounds, numRows) ]]">
+                                <div>[[ displayY(y) ]]</div>
+                            </template>
+                    </div>
+                <template is="dom-repeat" as="x" items="[[ range(xBounds, numCols) ]]">
+                    <div class="col">
+                        <div class="header-top">[[ displayX(x) ]]</div>
+                        <template is="dom-repeat" as="y" items="[[ range(yBounds, numRows) ]]">
+                            <div class$="[[ getCellClass(currentX, currentY, x, y) ]]">[[ displayUtilityFunction(x, y) ]]</div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
 
-        <div style="text-align:center">
-            <div class="header-top">SELL</div>
-            <div class="container" >
+        <template is="dom-if" if= "{{ !staticGridEnabled }}">
+            <div style="text-align:center">
+                <div class="header-top">SELL</div>
+                <div class="container" >
+                    <div class="col header-left">
+                        <div class="header-top">Y\\X</div>
+                        <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
+                            <div>[[ displayY(y) ]]</div>
+                        </template>
+                    </div>
+                    <template is="dom-repeat" as="x" items="[[ range(xBoundsGrid, numCols) ]]">
+                        <div class="col">
+                            <div class="header-top">[[ displayX(x) ]]</div>
+                            <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
+                                <div>[[ displaySellUtilityFunction(x, y, currentX, currentY) ]]</div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="header-top">BUY</div>
+                <div class="container">
                 <div class="col header-left">
                     <div class="header-top">Y\\X</div>
                     <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
@@ -65,29 +108,13 @@ class UtilityGrid extends PolymerElement {
                     <div class="col">
                         <div class="header-top">[[ displayX(x) ]]</div>
                         <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
-                            <div class$="[[ getCellClass(currentX, currentY, x, y) ]]">[[ displaySellUtilityFunction(x, y, currentX, currentY) ]]</div>
+                            <div>[[ displayBuyUtilityFunction(x, y, currentX, currentY) ]]</div>
                         </template>
                     </div>
                 </template>
             </div>
+        </template>
 
-            <div class="header-top">BUY</div>
-            <div class="container">
-            <div class="col header-left">
-                <div class="header-top">Y\\X</div>
-                <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
-                    <div>[[ displayY(y) ]]</div>
-                </template>
-            </div>
-            <template is="dom-repeat" as="x" items="[[ range(xBoundsGrid, numCols) ]]">
-                <div class="col">
-                    <div class="header-top">[[ displayX(x) ]]</div>
-                    <template is="dom-repeat" as="y" items="[[ range(yBoundsGrid, numRows) ]]">
-                        <div class$="[[ getCellClass(currentX, currentY, x, y) ]]">[[ displayBuyUtilityFunction(x, y, currentX, currentY) ]]</div>
-                    </template>
-                </div>
-            </template>
-        </div>
             
         `;
     }
@@ -115,6 +142,14 @@ class UtilityGrid extends PolymerElement {
         return this.$.currency_scaler.yToHumanReadable(y)
             .toFixed(2)
             .replace(/\.?0+$/, '');
+    }
+
+    displayUtilityFunction(x, y) {
+        // return a string with the utility value for x and y, with a maximum of 2 decimal points
+
+        return this.utilityFunction(x, y)
+            .toFixed(1)
+            .replace(/\.?0+$/, '')
     }
 
     displaySellUtilityFunction(x, y, currentX, currentY) {
@@ -156,13 +191,14 @@ class UtilityGrid extends PolymerElement {
     }
 
     getCellClass(currentX, currentY, cellX, cellY) {
-        return "";
         const xStep = (this.xBoundsGrid[1] - this.xBoundsGrid[0]) / (this.numCols - 1);
         const nearestX = Math.round(currentX / xStep) * xStep;
         const yStep = (this.yBoundsGrid[1] - this.yBoundsGrid[0]) / (this.numRows - 1);
         const nearestY = Math.round(currentY / yStep) * yStep;
 
+
         if (cellX == nearestX && cellY == nearestY) {
+            // console.log("I SHOULD BE GREEN")
             return 'current-bundle';
         }
         return '';

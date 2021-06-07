@@ -29,6 +29,8 @@ post_round_delay: 30
 
 # whether to draw the heatmap
 heatmap_enabled: false
+# whether to use static or dynamic utility grid. In order to use the dual grid, make this variable false.
+static_grid_enabled: true
 
 # utility grid x and y bounds. These will be the bounds if the heatmap_enabled is false
 x_bounds_grid: [0,3]

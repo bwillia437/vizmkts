@@ -46,6 +46,7 @@ class VisualMarkets extends PolymerElement {
             proposedX: Number,
             proposedY: Number,
             heatmapEnabled: Boolean,
+            staticGridEnabled: Boolean,
             showNBestOrders: Number,
             showNMostRecentTrades: Number,
             showOwnTradesOnly: Boolean,
@@ -270,15 +271,34 @@ class VisualMarkets extends PolymerElement {
                             </div>
                         </template>
                         <template is="dom-if" if="{{ !heatmapEnabled }}">
-                            <div class="grid-cell">
-                                <utility-grid
-                                    utility-function="[[ utilityFunction ]]"
-                                    current-x="[[ currentX ]]"
-                                    current-y="[[ currentY ]]"
-                                    x-bounds-grid="[[ xBoundsGrid ]]"
-                                    y-bounds-grid="[[ yBoundsGrid ]]"
-                                ></utility-grid>
-                            </div>
+                            <template is="dom-if" if="{{staticGridEnabled}}">
+                                <div class="grid-cell">
+                                    <utility-grid
+                                        utility-function="[[ utilityFunction ]]"
+                                        static-grid-enabled= "[[ staticGridEnabled ]]"
+                                        current-x="[[ currentX ]]"
+                                        current-y="[[ currentY ]]"
+                                        x-bounds="[[ xBounds ]]"
+                                        y-bounds="[[ yBounds ]]"
+                                        x-bounds-grid="[[ xBoundsGrid ]]"
+                                        y-bounds-grid="[[ yBoundsGrid ]]"
+                                    ></utility-grid>
+                                </div>
+                            </template>
+                            <template is="dom-if" if="{{!staticGridEnabled}}">
+                                <div class="grid-cell">
+                                    <utility-grid
+                                        utility-function="[[ utilityFunction ]]"
+                                        static-grid-enabled= "[[ staticGridEnabled ]]"
+                                        current-x="[[ currentX ]]"
+                                        current-y="[[ currentY ]]"
+                                        x-bounds="[[ xBounds ]]"
+                                        y-bounds="[[ yBounds ]]"
+                                        x-bounds-grid="[[ xBoundsGrid ]]"
+                                        y-bounds-grid="[[ yBoundsGrid ]]"
+                                    ></utility-grid>
+                                </div>
+                            </template>
                         </template>
                     </div>
                 </div>

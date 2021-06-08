@@ -9,10 +9,10 @@
 <div>
 {% for p in player.in_all_rounds %}
     {% if p.round_number <= subsession.config.num_rounds and not p.config.is_practice %}
-    <div><b>Round {{p.round_number}}: </b><span>{{ p.get_unscaled_payoff|floatformat }}</span><span> points</span></span></div>
+    <div><b>Round {{p.round_number}}: </b><span>{{ p.get_unscaled_payoff|floatformat:2 }}</span><span> points</span></span></div>
     {% endif %}
 {% endfor %}
-<div><b>Total Payoff: </b><span>{{ total_unscaled_payoff|floatformat }}</span><span> points</span></div>
+<div><b>Total Payoff: </b><span>{{ total_unscaled_payoff|floatformat:2 }}</span><span> points</span></div>
 </div>
 
 {% endblock %}

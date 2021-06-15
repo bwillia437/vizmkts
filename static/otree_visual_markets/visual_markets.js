@@ -107,7 +107,15 @@ class VisualMarkets extends PolymerElement {
 
             <div class="full-width">
                 <div class="header">
-                    <span>Time Remaining:</span><span>[[ formatTimeRemaining(timeRemaining) ]]</span>
+                    <div>
+                        <span>Round </span>
+                        <span>[[ roundNumber() ]]</span>
+                    </div>
+                    <div class="flex-padding"></div>
+                    <div>
+                        <span>Time Remaining:</span>
+                        <span>[[ formatTimeRemaining(timeRemaining) ]]</span>
+                    </div>
                 </div>
 
                 <div class="main-container">
@@ -607,6 +615,9 @@ class VisualMarkets extends PolymerElement {
         // price is in units Y per unit X, so scaling has to respect that
         const factor = this.$.currency_scaler.yScale / this.$.currency_scaler.xScale;
         return Math.round(price * factor);
+    }
+    roundNumber() {
+        return this.$.constants.roundNumber;
     }
 }
 

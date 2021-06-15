@@ -4,10 +4,14 @@
 
 .header {
     background-color: lightgray;
+    display: flex;
+    padding: 1em;
 }
-.header > span:first-child {
+.header > .flex-padding {
+    flex: 0 1 2em;
+}
+.header span:first-child {
     font-weight: bold;
-    padding: 1em 0 1em 1em;
 }
 
 h3 {

@@ -28,7 +28,6 @@ class VisualMarkets extends PolymerElement {
             maxUtility: Number,
             xBounds: Array,
             yBounds: Array,
-            xBoundsGrid: Array,
             yBoundsGrid: Array,
             bids: Array,
             asks: Array,
@@ -288,8 +287,6 @@ class VisualMarkets extends PolymerElement {
                                         current-y="[[ currentY ]]"
                                         x-bounds="[[ xBounds ]]"
                                         y-bounds="[[ yBounds ]]"
-                                        x-bounds-grid="[[ xBoundsGrid ]]"
-                                        y-bounds-grid="[[ yBoundsGrid ]]"
                                     ></utility-grid>
                                 </div>
                             </template>
@@ -302,8 +299,6 @@ class VisualMarkets extends PolymerElement {
                                         current-y="[[ currentY ]]"
                                         x-bounds="[[ xBounds ]]"
                                         y-bounds="[[ yBounds ]]"
-                                        x-bounds-grid="[[ xBoundsGrid ]]"
-                                        y-bounds-grid="[[ yBoundsGrid ]]"
                                     ></utility-grid>
                                 </div>
                             </template>

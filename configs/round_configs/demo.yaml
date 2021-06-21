@@ -1,6 +1,4 @@
 # sample round config
-# all endowments can be specified either as a single number or a list of endowments, one for each player in each group
-# if an endowment list is shorter than the number of players in the group, endowments wrap back around to the beginning
 
 # number of players in each group or null if there's only one group
 players_per_group: null
@@ -9,17 +7,23 @@ players_per_group: null
 x_endowment: 20
 # scaling for x asset
 x_currency_scale: 10
-# heatmap bounds for x asset
+# bounds for x asset
 x_bounds: [0, 50]
 
 # starting y (cash) endowment for each player
 y_endowment: 20
 # scaling for y asset
 y_currency_scale: 1000
-# heatmap bounds for y asset
+# bounds for y asset
 y_bounds: [0, 50]
 
+# function for calculating utility given a player's current x and y holdings
+# this calculation is done after scaling, so x and y are fractional values
+# this function needs to be both valid javascript and python code which means available operations are
+# pretty much just limited to arithmetic
 utility_function: "(x ** 0.5) * (y ** 0.5)"
+# the maximum utility value which can be reached by a player
+# this is used to scale displayed utility values when generating the heatmap
 max_utility: 50
 
 # the length of the round in seconds
@@ -31,12 +35,6 @@ post_round_delay: 30
 heatmap_enabled: false
 # whether to use static or dynamic utility grid. In order to use the dual grid, make this variable false.
 static_grid_enabled: true
-
-
-# utility grid x and y bounds. These will be the bounds if the heatmap_enabled is false
-x_bounds_grid: [0,3]
-y_bounds_grid: [0,3]
-
 
 # this number determines the number of orders to display in the list.
 # if it's 0 then all orders are shown, if -1 then only your own orders are shown.
@@ -78,7 +76,6 @@ role_params:
   buyer:
     x_endowment: 10
     y_endowment: 20
-    utility_function: "(x ** 0.5) * (y ** 0.5)"
   seller:
     x_endowment: 15
     y_endowment: 10

@@ -67,6 +67,7 @@ h3 {
 .left-side {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     flex: 1;
 }
 .list-container {
@@ -237,3 +238,12 @@ button:hover{
     padding: 20px;
     float: left;
     }
+
+.standalone-pricevolume {
+    margin: 0 auto 0 auto;
+}
+
+.standalone-pricevolume button {
+    background-color:  #EBEBEB;
+    color: black !important;
+}

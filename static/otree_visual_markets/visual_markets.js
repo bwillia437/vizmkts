@@ -44,6 +44,9 @@ class VisualMarkets extends PolymerElement {
             currentY: Number,
             proposedX: Number,
             proposedY: Number,
+            // used to keep track of whether the current order is a bid when
+            // using the single order entry box (ie when showOrderBook is false)
+            standaloneOrderIsBid: Boolean, 
             heatmapEnabled: Boolean,
             staticGridEnabled: Boolean,
             showNBestOrders: Number,
@@ -52,6 +55,7 @@ class VisualMarkets extends PolymerElement {
             usePartialEquilibrium: Boolean,
             showMarketOnHeatmap: Boolean,
             disableInputEntry: Boolean,
+            showOrderBook: Boolean,
             sortTrades: {
                 type: Boolean,
                 value: false,
@@ -119,85 +123,87 @@ class VisualMarkets extends PolymerElement {
 
                 <div class="main-container">
                     <div class="left-side">
-                        <div class="list-container">
-                            <div class="list-cell" style= "border-radius: 5px;border: 2px solid red;">
-                                <div class="Title" style= "background-color: red;">
-                                    <h3>Bids</h3>
-                                </div>
-                                <filtered-order-list
-                                    class="flex-fill"
-                                    orders="[[bids]]"
-                                    on-order-canceled="_order_canceled"
-                                    on-order-accepted="_order_accepted"
-                                    display-format="[[orderFormat]]"
-                                    limit-num="[[showNBestOrders]]"
-                                ></filtered-order-list>
-                                <div style="margin:auto;">
-                                    <div on-input="_updateProposedBundleBid">
-                                        <div class ="pricevolumeinput" style="width: 90%;
-                                        height: 30;">
-                                            <label for="bid_price_input">Price: </label>
-                                            <input id="bid_price_input" type="number" min="0" disabled = "[[checkDisabled(running)]]">
+                        <template is="dom-if" if="{{showOrderBook}}">
+                            <div class="list-container">
+                                <div class="list-cell" style= "border-radius: 5px;border: 2px solid red;">
+                                    <div class="Title" style= "background-color: red;">
+                                        <h3>Bids</h3>
+                                    </div>
+                                    <filtered-order-list
+                                        class="flex-fill"
+                                        orders="[[bids]]"
+                                        on-order-canceled="_order_canceled"
+                                        on-order-accepted="_order_accepted"
+                                        display-format="[[orderFormat]]"
+                                        limit-num="[[showNBestOrders]]"
+                                    ></filtered-order-list>
+                                    <div style="margin:auto;">
+                                        <div on-input="_updateProposedBundleBid">
+                                            <div class ="pricevolumeinput" style="width: 90%;
+                                            height: 30;">
+                                                <label for="bid_price_input">Price: </label>
+                                                <input id="bid_price_input" type="number" min="0" disabled = "[[checkDisabled(running)]]">
+                                            </div>
+                                            <div class ="pricevolumeinput" style="width:90%">
+                                                <label for="bid_volume_input">Qty: </label>
+                                                <input id="bid_volume_input" type="number" min="1" disabled = "[[checkDisabled(running)]]">
+                                            </div>
                                         </div>
-                                        <div class ="pricevolumeinput" style="width:90%">
-                                            <label for="bid_volume_input">Qty: </label>
-                                            <input id="bid_volume_input" type="number" min="1" disabled = "[[checkDisabled(running)]]">
+                                        <div>
+                                            <button type="button" on-click="_enter_bid" style = "background: #E01936;" disabled="{{!running}}">Bid</button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <button type="button" on-click="_enter_bid" style = "background: #E01936;" disabled="{{!running}}">Bid</button>
+                                </div>
+                                <div class="list-cell" style= "border-radius: 5px;border: 2px solid grey; 
+                                outline-offset: 0px;">
+                                    <div class="Title" style= "background-color: grey;">
+                                        <h3>Trades
+                                        <template is="dom-if" if="{{isFinished}}">
+                                            <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
+                                            <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
+                                        </template>
+                                        </h3>
+                                    </div>
+                                    <filtered-trade-list
+                                        class="flex-fill"
+                                        trades="[[trades]]"
+                                        display-format="[[tradeFormat]]"
+                                        limit-num="[[showNMostRecentTrades]]"
+                                        show-own-only="[[showOwnTradesOnly]]"
+                                        sort-trades="[[sortTrades]]"
+                                    ></filtered-trade-list>
+                                </div>
+                                <div class="list-cell" style= "border-radius: 5px;border: 2px solid green; 
+                                outline-offset: 0px;">
+                                    <div class="Title" style= "background-color: green;">
+                                        <h3>Asks</h3>
+                                    </div>
+                                    <filtered-order-list
+                                        class="flex-fill"
+                                        orders="[[asks]]"
+                                        on-order-canceled="_order_canceled"
+                                        on-order-accepted="_order_accepted"
+                                        display-format="[[orderFormat]]"
+                                        limit-num="[[showNBestOrders]]"
+                                    ></filtered-order-list>
+                                    <div style="margin:auto;">
+                                        <div on-input="_updateProposedBundleAsk">
+                                        <div class ="pricevolumeinput" style="width: 90%; height: 30;">
+                                                <label for="ask_price_input">Price: </label>
+                                                <input id="ask_price_input" type="number" min="0" disabled = "[[checkDisabled(running)]]">
+                                            </div>
+                                            <div class ="pricevolumeinput" style="width:90%">
+                                                <label for="ask_volume_input">Qty: </label>
+                                                <input id="ask_volume_input" type="number" min="1" disabled = "[[checkDisabled(running)]]">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button type="button" on-click="_enter_ask" style = "background: #09C206;" disabled="{{!running}}">Ask</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="list-cell" style= "border-radius: 5px;border: 2px solid grey; 
-                            outline-offset: 0px;">
-                                <div class="Title" style= "background-color: grey;">
-                                    <h3>Trades
-                                    <template is="dom-if" if="{{isFinished}}">
-                                        <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
-                                        <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
-                                    </template>
-                                    </h3>
-                                </div>
-                                <filtered-trade-list
-                                    class="flex-fill"
-                                    trades="[[trades]]"
-                                    display-format="[[tradeFormat]]"
-                                    limit-num="[[showNMostRecentTrades]]"
-                                    show-own-only="[[showOwnTradesOnly]]"
-                                    sort-trades="[[sortTrades]]"
-                                ></filtered-trade-list>
-                            </div>
-                            <div class="list-cell" style= "border-radius: 5px;border: 2px solid green; 
-                            outline-offset: 0px;">
-                                <div class="Title" style= "background-color: green;">
-                                    <h3>Asks</h3>
-                                </div>
-                                <filtered-order-list
-                                    class="flex-fill"
-                                    orders="[[asks]]"
-                                    on-order-canceled="_order_canceled"
-                                    on-order-accepted="_order_accepted"
-                                    display-format="[[orderFormat]]"
-                                    limit-num="[[showNBestOrders]]"
-                                ></filtered-order-list>
-                                <div style="margin:auto;">
-                                    <div on-input="_updateProposedBundleAsk">
-                                    <div class ="pricevolumeinput" style="width: 90%; height: 30;">
-                                            <label for="ask_price_input">Price: </label>
-                                            <input id="ask_price_input" type="number" min="0" disabled = "[[checkDisabled(running)]]">
-                                        </div>
-                                        <div class ="pricevolumeinput" style="width:90%">
-                                            <label for="ask_volume_input">Qty: </label>
-                                            <input id="ask_volume_input" type="number" min="1" disabled = "[[checkDisabled(running)]]">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <button type="button" on-click="_enter_ask" style = "background: #09C206;" disabled="{{!running}}">Ask</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        </template>
 
                         <div class="info-table-and-log">
                             <div class="info-table">
@@ -229,6 +235,23 @@ class VisualMarkets extends PolymerElement {
                             </div>
                         </div>
                         
+                        <template is="dom-if" if="{{!showOrderBook}}">
+                            <div class="standalone-pricevolume">
+                                <div>
+                                    <div class="pricevolumeinput" style="width: 90%; height: 30;">
+                                        <label for="standalone_price_input">Price: </label>
+                                        <input id="standalone_price_input" type="number" min="0" readonly>
+                                    </div>
+                                    <div class="pricevolumeinput" style="width:90%">
+                                        <label for="standalone_volume_input">Qty: </label>
+                                        <input id="standalone_volume_input" type="number" min="1" readonly>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" on-click="_enterOrderStandalone" disabled="{{!running}}">Enter Order</button>
+                                </div>
+                            </div>
+                        </template>
 
                     </div>
                     <div class="right-side">
@@ -402,27 +425,79 @@ class VisualMarkets extends PolymerElement {
         if (proposedX > this.currentX) {
             const volume = this.$.currency_scaler.xToHumanReadable(proposedX - this.currentX);
             const price = this.$.currency_scaler.yToHumanReadable(this.currentY - proposedY) / volume;
-            this.$.bid_volume_input.value = volume.toFixed(numVolumeDigits);
-            this.$.bid_price_input.value = price.toFixed(numPriceDigits);
-            
-            this.$.ask_volume_input.value = '';
-            this.$.ask_price_input.value = '';
+
+            this._setBidInput(price.toFixed(numPriceDigits), volume.toFixed(numVolumeDigits));
         }
         else {
             const volume = this.$.currency_scaler.xToHumanReadable(this.currentX - proposedX);
             const price = this.$.currency_scaler.yToHumanReadable(proposedY - this.currentY) / volume;
-            this.$.ask_volume_input.value = volume.toFixed(numVolumeDigits);
-            this.$.ask_price_input.value = price.toFixed(numPriceDigits);
 
-            this.$.bid_volume_input.value = '';
-            this.$.bid_price_input.value = '';
+            this._setAskInput(price.toFixed(numPriceDigits), volume.toFixed(numVolumeDigits));
         }
     }
 
-    _updateProposedBundleBid() {
-        let price = parseFloat(this.$.bid_price_input.value);
+    _setBidInput(price, volume) {
+        if (this.showOrderBook) {
+            this.getByIdDynamic('bid_volume_input').value = volume;
+            this.getByIdDynamic('bid_price_input').value = price;
+            
+            this.getByIdDynamic('ask_volume_input').value = '';
+            this.getByIdDynamic('ask_price_input').value = '';
+        }
+        else {
+            this.standaloneOrderIsBid = true;
+            this._setStandalonePriceInput(price, volume);
+        }
+    }
+
+    _setAskInput(price, volume) {
+        if (this.showOrderBook) {
+            this.getByIdDynamic('ask_volume_input').value = volume;
+            this.getByIdDynamic('ask_price_input').value = price;
+
+            this.getByIdDynamic('bid_volume_input').value = '';
+            this.getByIdDynamic('bid_price_input').value = '';
+        }
+        else {
+            this.standaloneOrderIsBid = false;
+            this._setStandalonePriceInput(price, volume);
+        }
+    }
+
+    _setStandalonePriceInput(price, volume) {
+        this.getByIdDynamic('standalone_volume_input').value = volume;
+        this.getByIdDynamic('standalone_price_input').value = price;
+    }
+
+    _enterOrderStandalone() {
+        if (typeof this.standaloneOrderIsBid === 'undefined') return;
+
+        let price = parseFloat(this.getByIdDynamic('standalone_price_input').value);
         price = this.priceFromHumanReadable(price);
-        let volume = parseFloat(this.$.bid_volume_input.value);
+        if (isNaN(price) || price < 0) {
+            this.$.log.error('Can\'t enter order: invalid price');
+            return;
+        }
+
+        let volume = parseFloat(this.getByIdDynamic('standalone_volume_input').value);
+        volume = this.$.currency_scaler.xFromHumanReadable(volume);
+        if (isNaN(volume) || volume < 0) {
+            this.$.log.error('Can\'t enter order: invalid volume');
+            return;
+        }
+
+        this.$.trader_state.enter_order(price, volume, this.standaloneOrderIsBid);
+
+        this.setProperties({
+            proposedX: null,
+            proposedY: null,
+        });
+    }
+
+    _updateProposedBundleBid() {
+        let price = parseFloat(this.getByIdDynamic('bid_price_input').value);
+        price = this.priceFromHumanReadable(price);
+        let volume = parseFloat(this.getByIdDynamic('bid_volume_input').value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
 
         if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
@@ -440,9 +515,9 @@ class VisualMarkets extends PolymerElement {
     }
 
     _updateProposedBundleAsk() {
-        let price = parseFloat(this.$.ask_price_input.value);
+        let price = parseFloat(this.getByIdDynamic('ask_price_input').value);
         price = this.priceFromHumanReadable(price);
-        let volume = parseFloat(this.$.ask_volume_input.value);
+        let volume = parseFloat(this.getByIdDynamic('ask_volume_input').value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(price) || price < 0 || isNaN(volume) || volume < 0) {
             this.setProperties({
@@ -459,14 +534,14 @@ class VisualMarkets extends PolymerElement {
     }
 
     _enter_bid() {
-        let price = parseFloat(this.$.bid_price_input.value);
+        let price = parseFloat(this.getByIdDynamic('bid_price_input').value);
         price = this.priceFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             this.$.log.error('Can\'t enter bid: invalid price');
             return;
         }
 
-        let volume = parseFloat(this.$.bid_volume_input.value);
+        let volume = parseFloat(this.getByIdDynamic('bid_volume_input').value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
             this.$.log.error('Can\'t enter bid: invalid volume');
@@ -482,14 +557,14 @@ class VisualMarkets extends PolymerElement {
     }
 
     _enter_ask() {
-        let price = parseFloat(this.$.ask_price_input.value);
+        let price = parseFloat(this.getByIdDynamic('ask_price_input').value);
         price = this.priceFromHumanReadable(price);
         if (isNaN(price) || price < 0) {
             this.$.log.error('Can\'t enter ask: invalid price');
             return;
         }
 
-        let volume = parseFloat(this.$.ask_volume_input.value);
+        let volume = parseFloat(this.getByIdDynamic('ask_volume_input').value);
         volume = this.$.currency_scaler.xFromHumanReadable(volume);
         if (isNaN(volume) || volume < 0) {
             this.$.log.error('Can\'t enter ask: invalid volume');
@@ -613,6 +688,12 @@ class VisualMarkets extends PolymerElement {
     }
     roundNumber() {
         return this.$.constants.roundNumber;
+    }
+    // get a dynamically generated node by its id
+    // dynamically generated nodes include anything inside a dom-if or dom-repeat tag
+    // this effectively does the same thing as this.$.id, but it works for stuff inside these dynamic tags
+    getByIdDynamic(id) {
+        return this.shadowRoot.querySelector('#' + id);
     }
 }
 

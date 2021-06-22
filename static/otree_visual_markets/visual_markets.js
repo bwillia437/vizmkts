@@ -339,12 +339,12 @@ class VisualMarkets extends PolymerElement {
         this.orderFormat = order => {
             const price = this.priceToHumanReadable(order.price);
             const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
-            return `${volume} @ $${price}`;
+            return `${volume} @ ${price}`;
         };
         this.tradeFormat = (making_order, taking_order) => {
             const price = this.priceToHumanReadable(making_order.price);
             const volume = this.$.currency_scaler.xToHumanReadable(making_order.traded_volume);
-            return `${volume} @ $${price}`;
+            return `${volume} @ ${price}`;
         };
 
         for (let bid of this.bids) {

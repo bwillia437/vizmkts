@@ -147,6 +147,7 @@ class Player(markets_models.Player):
 
         initial_payoff = initial_utility * config.payoff_initial_multiplier
         gains_payoff = (current_utility - initial_utility) * config.payoff_gain_multiplier
+        gains_payoff = max(gains_payoff, 0)
         self.payoff = (initial_payoff + gains_payoff) * 1000
     
     def get_unscaled_payoff(self):

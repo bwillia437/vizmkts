@@ -601,7 +601,7 @@ class VisualMarkets extends PolymerElement {
         const price = this.priceToHumanReadable(order.price);
         const volume = this.$.currency_scaler.xToHumanReadable(order.volume);
 
-        this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${volume} units for $${price}?`
+        this.$.modal.modal_text = `Do you want to ${order.is_bid ? 'sell' : 'buy'} ${volume} units for ${price}?`
         this.$.modal.buttons = ['No', 'Yes'];
         this.$.modal.on_close_callback = (button_index) => {
             if (button_index == 1)
@@ -611,7 +611,9 @@ class VisualMarkets extends PolymerElement {
     }
 
     _onError(event) {
-        const message = event.detail;
+        let message = event.detail;
+        // we either die heroes or live long enough to see ourselves become villains
+        message = message.replace('cash', 'goods');
         this.$.log.error(message);
     }
 

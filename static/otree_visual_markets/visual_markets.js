@@ -205,7 +205,7 @@ class VisualMarkets extends PolymerElement {
                             </div>
                         </template>
 
-                        <div class="info-table-and-log">
+                        <div class="info-table-and-log" style$="[[ getInfoTableAndLogFlexDirection(showOrderBook) ]]">
                             <div class="info-table">
                                 <div class ="Title">Your Allocation</div>
 
@@ -696,6 +696,9 @@ class VisualMarkets extends PolymerElement {
     // this effectively does the same thing as this.$.id, but it works for stuff inside these dynamic tags
     getByIdDynamic(id) {
         return this.shadowRoot.querySelector('#' + id);
+    }
+    getInfoTableAndLogFlexDirection(showOrderBook) {
+        return showOrderBook ? '' : 'flex-direction: column;';
     }
 }
 

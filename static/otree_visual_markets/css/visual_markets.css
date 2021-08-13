@@ -88,10 +88,12 @@ h3 {
     align-items: center;
 }
 .info-table-and-log > div {
+    width: 100%;
     flex: 1;
     margin: 5px;
 }
 .log {
+    min-height: 150px;
     max-width: 500px;
     height: 10em;
     border: 2px solid black;

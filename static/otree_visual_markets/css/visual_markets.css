@@ -82,12 +82,6 @@ h3 {
     display: flex;
     flex-direction: column;
 }
-.standalone-trade-list {
-    flex: 1 0 0;
-    min-height: 0;
-    width: 250px;
-    align-self: center;
-}
 .info-table-and-log {
     display: flex;
     justify-content: center;

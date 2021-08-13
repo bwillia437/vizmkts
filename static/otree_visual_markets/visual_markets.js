@@ -206,14 +206,32 @@ class VisualMarkets extends PolymerElement {
                         </template>
 
                         <template is="dom-if" if="{{!showOrderBook}}">
-                            <filtered-trade-list
+                            <div class="list-cell" style="border-radius: 5px; border: 2px solid grey; outline-offset: 0px; align-self: center; width: 250px">
+                                <div class="Title" style= "background-color: grey;">
+                                    <h3>Trades
+                                    <template is="dom-if" if="{{isFinished}}">
+                                        <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
+                                        <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
+                                    </template>
+                                    </h3>
+                                </div>
+                                <filtered-trade-list
+                                    class="flex-fill"
+                                    trades="[[trades]]"
+                                    display-format="[[tradeFormat]]"
+                                    limit-num="[[showNMostRecentTrades]]"
+                                    show-own-only="[[showOwnTradesOnly]]"
+                                    sort-trades="[[sortTrades]]"
+                                ></filtered-trade-list>
+                            </div>
+                            <!-- <filtered-trade-list
                                 class="standalone-trade-list"
                                 trades="[[trades]]"
                                 display-format="[[tradeFormat]]"
                                 limit-num="[[showNMostRecentTrades]]"
                                 show-own-only="[[showOwnTradesOnly]]"
                                 sort-trades="[[sortTrades]]"
-                            ></filtered-trade-list>
+                            ></filtered-trade-list> -->
                         </template>
 
                         <div class="info-table-and-log" style$="[[ getInfoTableAndLogFlexDirection(showOrderBook) ]]">

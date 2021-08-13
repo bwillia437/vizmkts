@@ -205,6 +205,17 @@ class VisualMarkets extends PolymerElement {
                             </div>
                         </template>
 
+                        <template is="dom-if" if="{{!showOrderBook}}">
+                            <filtered-trade-list
+                                class="standalone-trade-list"
+                                trades="[[trades]]"
+                                display-format="[[tradeFormat]]"
+                                limit-num="[[showNMostRecentTrades]]"
+                                show-own-only="[[showOwnTradesOnly]]"
+                                sort-trades="[[sortTrades]]"
+                            ></filtered-trade-list>
+                        </template>
+
                         <div class="info-table-and-log" style$="[[ getInfoTableAndLogFlexDirection(showOrderBook) ]]">
                             <div class="info-table">
                                 <div class ="Title">Your Allocation</div>

@@ -44,7 +44,7 @@ h3 {
 }
 .right-side {
     position: relative;
-    flex: 1;
+    flex: 0 1 95vh;
     display: flex;
 }
 #results {
@@ -137,7 +137,6 @@ h3 {
     display: flex;
     align-items: center;
     flex: 1;
-    max-width: 90vh;
     padding: 10px 10px 0 0;
 }
 .grid-cell {

@@ -23,26 +23,30 @@ class HeatmapElement extends PolymerElement {
                 :host {
                     box-sizing: border-box;
                     display: block;
+                    padding-right: 60px;
                     /* the width/height of the x and y axes */
                     --axis-size: 2em;
                     /* extra padding on the top/right of the heatmap to leave room for axis labels at extremes */
                     --axis-padding: 2em;
                 }
+                .thermometer-container {
+                    position: absolute;
+                    bottom: 0;
+                    transform-origin: bottom right;
+                    transform: rotate(90deg);
+                    width: 100%;
+                    height: 60px;
+                }
                 /* these css rules make an element square, based on its width */
                 .square-aspect {
                     height: 0;
-                    width: 100%;
                     padding-top: 100%;
                     position: relative;
                 }
-                .square-aspect > * {
+                .main_container {
                     position: absolute;
                     top: 0;
                     left: 0;
-                    width: 100%;
-                    height: 100%;
-                }
-                .main_container {
                     width: 100%;
                     height: 100%;
                 }
@@ -82,17 +86,16 @@ class HeatmapElement extends PolymerElement {
             <currency-scaler
                 id="currency_scaler"
             ></currency-scaler>
-            
-            <div class="thermometer-container">
-                <heatmap-thermometer
-                    color-scheme="[[ colorScheme ]]"
-                    max-utility="[[ maxUtility ]]"
-                    current-utility="[[ currentUtility ]]"
-                    hover-utility="[[ hoverUtility ]]"
-                ></heatmap-thermometer>
-            </div>
 
             <div class="square-aspect">
+                <div class="thermometer-container">
+                    <heatmap-thermometer
+                        color-scheme="[[ colorScheme ]]"
+                        max-utility="[[ maxUtility ]]"
+                        current-utility="[[ currentUtility ]]"
+                        hover-utility="[[ hoverUtility ]]"
+                    ></heatmap-thermometer>
+                </div>
                 <div class="main_container">
                     <canvas id="y_scale"></canvas>
                     <div id="heatmap_container" on-mousemove="hover" on-mouseout="mouseout" on-click="click">

@@ -23,7 +23,7 @@ class HeatmapElement extends PolymerElement {
                 :host {
                     box-sizing: border-box;
                     display: block;
-                    padding-right: 60px;
+                    padding-right: 70px;
                     /* the width/height of the x and y axes */
                     --axis-size: 2em;
                     /* extra padding on the top/right of the heatmap to leave room for axis labels at extremes */
@@ -31,9 +31,9 @@ class HeatmapElement extends PolymerElement {
                 }
                 .thermometer-container {
                     position: absolute;
-                    bottom: 0;
-                    transform-origin: bottom right;
-                    transform: rotate(90deg);
+                    top: 0;
+                    transform-origin: top right;
+                    transform: rotate(-90deg);
                     width: 100%;
                     height: 60px;
                 }

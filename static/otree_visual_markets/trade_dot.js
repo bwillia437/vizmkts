@@ -112,20 +112,20 @@ class TradeDot extends TradeList {
                     text: undefined
                 },
                 labels: {
-                    enabled: false
+                    enabled: true
                 }
             },
             
         
         
             xAxis: {
-                    min: -10,
-                max: 10,
+                //min: -10,
+                //max: 10,
                 accessibility: {
                     rangeDescription: 'X axis'
                 },
                 labels: {
-                    enabled: false
+                    enabled: true
                 }
             },
             series: [
@@ -239,20 +239,28 @@ class TradeDot extends TradeList {
                             graph_color = '#00FF00';
                         }
                     }
+                    // d = distance
+                    // m = slope
+
+                    // x = d / sqrt(1 + m^2)
+                    //let x = (length/2) / (Math.sqrt(1 + Math.pow(slope,2)));
+
+                    // y = dm / sqrt(1 + m^2)
+                    // let y = ((length * slope)/2) / (Math.sqrt(1 + Math.pow(slope,2)));
+
+                    let x = making_order.traded_volume / 10;
+                    let y = - (making_order.traded_volume / 10) * (making_order.price / 100);
+
     
-    
-                    let x = (length/2)/(Math.sqrt(1 + Math.pow(slope,2)));
-                    let y = ((length * slope)/2)/(Math.sqrt(1 + Math.pow(slope,2)));
-    
-    
+                    console.log(making_order);
+                    console.log(x);
+                    console.log(y);
                     this.graph_obj.addSeries({
                         color: graph_color,
                         data: [[x, y], [-x, -y]]
                     }, false);
                 }
                 i++;
-
-                console.log(making_order);
             }
         }
         this.graph_obj.redraw();

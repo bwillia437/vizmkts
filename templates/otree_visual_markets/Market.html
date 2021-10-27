@@ -8,6 +8,7 @@
 {% block scripts %}
     <script type="module" src="/static/otree_visual_markets/visual_markets.js"></script>
     <script type="module" src="/static/otree_visual_markets/currency_scaler.js"></script>
+    <script src="{% static 'otree_visual_markets/highcharts.js' %}"></script>
 {% endblock %}
 
 {% block styles %}
@@ -42,6 +43,7 @@
         use-partial-equilibrium="{{ config.use_partial_equilibrium }}"
         show-market-on-heatmap="{{ config.show_market_on_heatmap }}"
         show-order-book="{{ config.show_order_book }}"
+        show-trade-dot="{{ config.show_trade_dot }}"
         disable-input-entry="{{ config.disable_input_entry }}"
     ></visual-markets>
 

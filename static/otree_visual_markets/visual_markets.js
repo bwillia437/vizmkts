@@ -11,6 +11,7 @@ import '/static/otree_markets/event_log.js';
 import './heatmap_element.js';
 import './currency_scaler.js';
 import './filtered_order_list.js';
+import './trade_dot.js';
 import './filtered_trade_list.js';
 import './utility-grid.js';
 
@@ -56,6 +57,7 @@ class VisualMarkets extends PolymerElement {
             showMarketOnHeatmap: Boolean,
             disableInputEntry: Boolean,
             showOrderBook: Boolean,
+            showTradeDot: Boolean,
             sortTrades: {
                 type: Boolean,
                 value: false,
@@ -120,6 +122,7 @@ class VisualMarkets extends PolymerElement {
                         <span>[[ formatTimeRemaining(timeRemaining) ]]</span>
                     </div>
                 </div>
+                
 
                 <div class="main-container">
                     <div class="left-side">
@@ -206,32 +209,46 @@ class VisualMarkets extends PolymerElement {
                         </template>
 
                         <template is="dom-if" if="{{!showOrderBook}}">
-                            <div class="list-cell" style="border-radius: 5px; border: 2px solid grey; outline-offset: 0px; align-self: center; width: 250px">
-                                <div class="Title" style= "background-color: grey;">
-                                    <h3>Trades
-                                    <template is="dom-if" if="{{isFinished}}">
-                                        <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
-                                        <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
-                                    </template>
-                                    </h3>
+                            <template is="dom-if" if="{{!showTradeDot}}">
+                                <div class="list-cell" style="border-radius: 5px; border: 2px solid grey; outline-offset: 0px; align-self: center; width: 250px">
+                                    <div class="Title" style= "background-color: grey;">
+                                        <h3>Trades
+                                        <template is="dom-if" if="{{isFinished}}">
+                                            <label for="myCheck" style="box-shadow:none;">Sort Trades:</label> 
+                                            <span><input type="checkbox" id="myCheck" autocomplete="off" on-click="sort"></span>
+                                        </template>
+                                        </h3>
+                                    </div>
+                                    <filtered-trade-list
+                                        class="flex-fill"
+                                        trades="[[trades]]"
+                                        display-format="[[tradeFormat]]"
+                                        limit-num="[[showNMostRecentTrades]]"
+                                        show-own-only="[[showOwnTradesOnly]]"
+                                        sort-trades="[[sortTrades]]"
+                                    ></filtered-trade-list>
+                                    
                                 </div>
-                                <filtered-trade-list
-                                    class="flex-fill"
+                                <!-- <filtered-trade-list
+                                    class="standalone-trade-list"
                                     trades="[[trades]]"
                                     display-format="[[tradeFormat]]"
                                     limit-num="[[showNMostRecentTrades]]"
                                     show-own-only="[[showOwnTradesOnly]]"
                                     sort-trades="[[sortTrades]]"
-                                ></filtered-trade-list>
-                            </div>
-                            <!-- <filtered-trade-list
-                                class="standalone-trade-list"
-                                trades="[[trades]]"
-                                display-format="[[tradeFormat]]"
-                                limit-num="[[showNMostRecentTrades]]"
-                                show-own-only="[[showOwnTradesOnly]]"
-                                sort-trades="[[sortTrades]]"
-                            ></filtered-trade-list> -->
+                                ></filtered-trade-list> -->
+                            </template>
+                            <template is="dom-if" if="{{showTradeDot}}">
+                                <div class="" style="border-radius: 5px; border: 2px solid grey; outline-offset: 0px; align-self: center; width: 500px; height: 450px;">
+                                    <trade-dot
+                                        class="flex-fill"
+                                        trades="[[trades]]"
+                                        display-format="[[tradeFormat]]"
+                                        limit-num="[[showNMostRecentTrades]]"
+                                        show-own-only="[[showOwnTradesOnly]]"
+                                    ></trade-dot>
+                                </div>
+                            </template>
                         </template>
 
                         <div class="info-table-and-log" style$="[[ getInfoTableAndLogFlexDirection(showOrderBook) ]]">

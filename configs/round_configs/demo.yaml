@@ -57,7 +57,9 @@ show_market_on_heatmap: true
 # this config field can be used to disable the order book display on the left side of the interface
 # it replaces the bid/ask/trade boxes and their order inputs with a single box that shows the price/quantity of the
 # proposed bid and allows players to enter it as an order
-show_order_book: true
+show_order_book: false
+
+show_trade_dot: true
 
 # this config field disables the user input entry for price and qty.
 disable_input_entry: false

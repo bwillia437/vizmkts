@@ -10,7 +10,7 @@ class TradeDot extends TradeList {
     static get observers() {
         return [
           // Observer method name, followed by a list of dependencies, in parenthesis
-          '_updateDataset(trades.*)'
+          '_updateDataset(trades.*, limitNum, showOwnOnly)'
         ]
       }
 
@@ -23,7 +23,13 @@ class TradeDot extends TradeList {
             showOwnOnly: {
                 type: Boolean,
                 value: false,
-            }
+            },
+            tradeBoxScale: {
+                type: Number,
+                value: 0,
+            },
+            xBounds: Array,
+            yBounds: Array,
         };
     }
 
@@ -83,8 +89,7 @@ class TradeDot extends TradeList {
                      pointStart: 0,
                      marker: {
                         enabled: false
-                    }
-                   
+                     }
                  }
              },
          
@@ -108,25 +113,32 @@ class TradeDot extends TradeList {
 
             credits: { enabled: false },
             yAxis: {
+                min: (- (this.tradeBoxScale * (this.yBounds[1] - this.yBounds[0])) / 2) / 1000,
+                max:  ((this.tradeBoxScale * (this.yBounds[1] - this.yBounds[0])) / 2) / 1000,
                 title: {
                     text: undefined
                 },
                 labels: {
                     enabled: true
-                }
+                },
+                gridLineWidth: 0,
+                minorGridLineWidth: 0
             },
             
         
         
             xAxis: {
-                //min: -10,
-                //max: 10,
+                min: (- (this.tradeBoxScale * (this.xBounds[1] - this.xBounds[0])) / 2) / 10,
+                max:  ((this.tradeBoxScale * (this.xBounds[1] - this.xBounds[0])) / 2) / 10,
                 accessibility: {
                     rangeDescription: 'X axis'
                 },
                 labels: {
                     enabled: true
-                }
+                },
+                gridLineWidth: 0,
+                minorGridLineWidth: 0,
+                visible: true
             },
             series: [
                 {
@@ -136,7 +148,8 @@ class TradeDot extends TradeList {
                     marker: {
                         enabled: true,
                         radius: 7
-                    }
+                    },
+                    enableMouseTracking: false
                 }
             ],
             
@@ -190,8 +203,7 @@ class TradeDot extends TradeList {
         return transactions;
     }
 
-    _updateDataset(tradesChange) {
-        console.log("update");
+    _updateDataset(tradesChange, limitNum, showOwnOnly) {
         const trades = tradesChange.base;
         if (typeof trades === 'undefined') return;
         
@@ -209,7 +221,8 @@ class TradeDot extends TradeList {
             marker: {
                 enabled: true,
                 radius: 7
-            }
+            },
+            enableMouseTracking: false
         }, false);
 
         let i = 0;
@@ -220,23 +233,24 @@ class TradeDot extends TradeList {
                     trade.taking_order.pcode == this.pcode ||
                     ((!showOwnOnly && (limitNum == 0 || i < limitNum)))) {
 
-                    let slope = - making_order.price;
-                    let length = making_order.traded_volume;
+                    //let slope = - making_order.price;
+                    //let length = making_order.traded_volume;
 
                     // Default to black when player is not involved in trade 
-                    let graph_color = '#000000';
+                    let left_color = '#000000';
+                    let right_color = '#000000';
                     
                     if (making_order.pcode == this.pcode){
                         if (making_order.is_bid){
-                            graph_color = '#FF0000';
+                            right_color = '#FF0000';
                         } else {
-                            graph_color = '#00FF00';
+                            left_color = '#00FF00';
                         }
                     } else if(trade.taking_order.pcode == this.pcode){
                         if (trade.taking_order.is_bid){
-                            graph_color = '#FF0000';
+                            right_color = '#FF0000';
                         } else {
-                            graph_color = '#00FF00';
+                            left_color = '#00FF00';
                         }
                     }
                     // d = distance
@@ -252,12 +266,15 @@ class TradeDot extends TradeList {
                     let y = - (making_order.traded_volume / 10) * (making_order.price / 100);
 
     
-                    console.log(making_order);
-                    console.log(x);
-                    console.log(y);
                     this.graph_obj.addSeries({
-                        color: graph_color,
-                        data: [[x, y], [-x, -y]]
+                        color: right_color,
+                        data: [[x, y], [0, 0]],
+                        enableMouseTracking: false
+                    }, false);
+                    this.graph_obj.addSeries({
+                        color: left_color,
+                        data: [[0, 0], [-x, -y]],
+                        enableMouseTracking: false
                     }, false);
                 }
                 i++;

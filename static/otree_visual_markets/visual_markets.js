@@ -58,6 +58,7 @@ class VisualMarkets extends PolymerElement {
             disableInputEntry: Boolean,
             showOrderBook: Boolean,
             showTradeDot: Boolean,
+            tradeBoxScale: Number,
             sortTrades: {
                 type: Boolean,
                 value: false,
@@ -246,6 +247,9 @@ class VisualMarkets extends PolymerElement {
                                         display-format="[[tradeFormat]]"
                                         limit-num="[[showNMostRecentTrades]]"
                                         show-own-only="[[showOwnTradesOnly]]"
+                                        trade-box-scale="[[tradeBoxScale]]"
+                                        x-bounds="[[ xBounds ]]"
+                                        y-bounds="[[ yBounds ]]"
                                     ></trade-dot>
                                 </div>
                             </template>
@@ -483,7 +487,7 @@ class VisualMarkets extends PolymerElement {
     }
 
     _setBidInput(price, volume) {
-        if (this.showOrderBook) {
+        if (this.showOrderBook ) {
             this.getByIdDynamic('bid_volume_input').value = volume;
             this.getByIdDynamic('bid_price_input').value = price;
             
@@ -497,7 +501,7 @@ class VisualMarkets extends PolymerElement {
     }
 
     _setAskInput(price, volume) {
-        if (this.showOrderBook) {
+        if (this.showOrderBook ) {
             this.getByIdDynamic('ask_volume_input').value = volume;
             this.getByIdDynamic('ask_price_input').value = price;
 
@@ -533,7 +537,7 @@ class VisualMarkets extends PolymerElement {
         }
 
         this.$.trader_state.enter_order(price, volume, this.standaloneOrderIsBid);
-
+        
         this.setProperties({
             proposedX: null,
             proposedY: null,
@@ -688,14 +692,27 @@ class VisualMarkets extends PolymerElement {
     }
 
     _confirmTrade(event) {
+        console.log(this.$.trader_state.bids);
+        console.log(this.bids);
+        console.log(this.$.trader_state.asks);
+        console.log(this.asks);
         const trade = event.detail;
         for (const order of trade.making_orders.concat([trade.taking_order])) {
             if (order.pcode == this.pcode) {
+                console.log(order.volume);
+                order.volume -= order.traded_volume;
+                console.log(order.volume)
                 if (order.is_bid) {
-                    this.set('currentBid', null);
+                    if (order.volume == 0)
+                        this.set('currentBid', null);
+                    else
+                        this.set('currentBid', order);
                 }
                 else {
-                    this.set('currentAsk', null);
+                    if (order.volume == 0)
+                        this.set('currentAsk', null);
+                    else
+                        this.set('currentAsk', order);
                 }
             }
         }

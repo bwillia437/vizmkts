@@ -17,6 +17,8 @@ y_currency_scale: 1000
 # bounds for y asset
 y_bounds: [0, 50]
 
+trade_box_scale: 0.2
+
 # function for calculating utility given a player's current x and y holdings
 # this calculation is done after scaling, so x and y are fractional values
 # this function needs to be both valid javascript and python code which means available operations are

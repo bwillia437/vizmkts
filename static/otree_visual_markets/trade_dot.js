@@ -119,7 +119,7 @@ class TradeDot extends TradeList {
                     text: undefined
                 },
                 labels: {
-                    enabled: true
+                    enabled: false
                 },
                 gridLineWidth: 0,
                 minorGridLineWidth: 0
@@ -134,11 +134,11 @@ class TradeDot extends TradeList {
                     rangeDescription: 'X axis'
                 },
                 labels: {
-                    enabled: true
+                    enabled: false
                 },
                 gridLineWidth: 0,
                 minorGridLineWidth: 0,
-                visible: true
+                visible: false
             },
             series: [
                 {

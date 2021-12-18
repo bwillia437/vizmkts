@@ -134,6 +134,8 @@ class HeatmapElement extends PolymerElement {
             yBounds: Array,
             currentX: Number,
             currentY: Number,
+            initialX: Number,
+            initialY: Number,
             currentBid: Object,
             currentAsk: Object,
             bids: Array,
@@ -141,6 +143,7 @@ class HeatmapElement extends PolymerElement {
             maxUtility: Number,
             usePartialEquilibrium: Boolean,
             showMarketOnHeatmap: Boolean,
+            end: Boolean,
             hoverUtility: {
                 type: Number,
                 computed: 'calcHoverUtility(mouseX, mouseY, currentX, currentY, utilityFunction, xBounds, yBounds, width, height)',
@@ -168,6 +171,7 @@ class HeatmapElement extends PolymerElement {
             'drawHoverCurve(hoverUtility, width, height, quadTree)',
             'drawCurrentBundle(currentX, currentY, usePartialEquilibrium, currentUtility, xBounds, yBounds, width, height, quadTree)',
             'drawProposedBundle(proposedX, proposedY, xBounds, yBounds, width, height)',
+            'drawInitialAllocation(initialX, initialY, xBounds, yBounds, width, height)',
             'drawOrders(bids.splices, asks.splices, currentBid, currentAsk, currentX, currentY, xBounds, yBounds, width, height)',
             'drawXAxis(xBounds, axisSize, axisPadding, width, height)',
             'drawYAxis(yBounds, axisSize, axisPadding, width, height)',
@@ -483,6 +487,11 @@ class HeatmapElement extends PolymerElement {
         if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
 
         const ctx = this.$.proposed_bundle_canvas.getContext('2d');
+        
+        if(this.end == true) { 
+            return;
+        }
+        
         ctx.clearRect(0, 0, width, height);
 
         if (proposedX === null || proposedX === null)
@@ -497,6 +506,31 @@ class HeatmapElement extends PolymerElement {
         ctx.lineWidth = 2;
         ctx.fill();
         ctx.stroke();
+    }
+
+    drawInitialAllocation(initialX, initialY, xBounds, yBounds, width, height) {
+        if (Array.from(arguments).some(e => typeof e === 'undefined')) return;
+
+        const ctx = this.$.proposed_bundle_canvas.getContext('2d');
+        ctx.save();
+
+        if (initialX === null || initialY === null)
+            return;
+
+        this.setProperties({
+            end: true
+        });
+
+        const screenX = remap(initialX, xBounds[0], xBounds[1], 0, width);
+        const screenY = remap(initialY, yBounds[1], yBounds[0], 0, height);
+
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, BUNDLE_CIRCLE_RADIUS, 0, 2*Math.PI);
+        ctx.fillStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
     }
 
     /*
@@ -797,6 +831,10 @@ class HeatmapElement extends PolymerElement {
             }
         }
         return new MarchingSquaresJS.QuadTree(data);
+    }
+
+    _periodEnd(_event) {
+        console.log("end");
     }
 }
 

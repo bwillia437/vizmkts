@@ -45,6 +45,8 @@ class VisualMarkets extends PolymerElement {
             currentY: Number,
             proposedX: Number,
             proposedY: Number,
+            initialXEnd: Number,
+            initialYEnd: Number,
             // used to keep track of whether the current order is a bid when
             // using the single order entry box (ie when showOrderBook is false)
             standaloneOrderIsBid: Boolean, 
@@ -240,7 +242,9 @@ class VisualMarkets extends PolymerElement {
                                 ></filtered-trade-list> -->
                             </template>
                             <template is="dom-if" if="{{showTradeDot}}">
-                                <div class="" style="border-radius: 5px; border: 2px solid grey; outline-offset: 0px; align-self: center; width: 500px; height: 450px;">
+                                <div class="" style="border-radius: 5px; border: 2px solid grey; outline-offset: 0px; align-self: center; width: 500px; height: 450px;flex: 1;
+                                    display: flex;
+                                    flex-direction: column;">
                                     <trade-dot
                                         class="flex-fill"
                                         trades="[[trades]]"
@@ -305,7 +309,7 @@ class VisualMarkets extends PolymerElement {
 
                     </div>
                     <div class="right-side">
-                        <div id="results">
+                        <div id="results" style="top:15%;margin-left: 280px;">
                             <div>
                                 <span><strong>Final Allocation:</span></strong>
                                 <div>
@@ -343,6 +347,8 @@ class VisualMarkets extends PolymerElement {
                                     max-utility="[[ maxUtility ]]"
                                     proposed-x="[[ proposedX ]]"
                                     proposed-y="[[ proposedY ]]"
+                                    initial-x="[[ initialXEnd ]]"
+                                    initial-y="[[ initialYEnd ]]"
                                     use-partial-equilibrium="[[ usePartialEquilibrium ]]"
                                     show-market-on-heatmap="[[ showMarketOnHeatmap ]]"
                                     on-heatmap-click="onHeatmapClick"
@@ -721,6 +727,10 @@ class VisualMarkets extends PolymerElement {
     _periodEnd(_event) {
         this.$.results.style.display = "initial";
         this.isFinished = true;
+        this.setProperties({
+            initialXEnd: this.initialX,
+            initialYEnd: this.initialY,
+        });
     }
 
     xToHumanReadable(a) {

@@ -44,8 +44,9 @@ class TradeDot extends TradeList {
             <otree-constants
                 id="constants"
             ></otree-constants>
-
-            <div id="chart"></div>
+            <div id="chart" style="width: 100%;height: 100%;flex: 1;
+            display: flex;
+            flex-direction: column;"></div>
         `;
     }
 

@@ -29,7 +29,7 @@ utility_function: "(x ** 0.5) * (y ** 0.5)"
 max_utility: 50
 
 # the length of the round in seconds
-period_length: null
+period_length: 60
 # the amount the page should wait after the period ends in seconds
 post_round_delay: 30
 

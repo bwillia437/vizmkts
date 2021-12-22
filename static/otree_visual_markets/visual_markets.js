@@ -41,6 +41,10 @@ class VisualMarkets extends PolymerElement {
                 type: Object,
                 value: null,
             },
+            orderText: {
+                type: String,
+                value: 'Enter Order'
+            },
             currentX: Number,
             currentY: Number,
             proposedX: Number,
@@ -266,14 +270,14 @@ class VisualMarkets extends PolymerElement {
                                 <div class ="infoboxcell">
                                     <div class="Heading">
                                         <label for="[[ xToHumanReadable(currentX) ]]">X:</label>
-                                        <span>[[ xToHumanReadable(currentX) ]]</span>
+                                        <span>[[ xToHumanReadableRounded(currentX) ]]</span>
                                     </div>
                                 </div>
 
                                 <div class="infoboxcell">
                                     <div class="Heading">
                                         <label for="[[ yToHumanReadable(currentY) ]]">Y:</label>
-                                        <span>[[ yToHumanReadable(currentY) ]]</span>
+                                        <span>[[ yToHumanReadableRounded(currentY) ]]</span>
                                     </div>
                                 </div>
 
@@ -302,7 +306,7 @@ class VisualMarkets extends PolymerElement {
                                     </div>
                                 </div>
                                 <div>
-                                    <button type="button" on-click="_enterOrderStandalone" disabled="{{!running}}">Enter Order</button>
+                                    <button type="button" on-click="_enterOrderStandalone" disabled="{{!running}}">[[ orderText]]</button>
                                 </div>
                             </div>
                         </template>
@@ -502,6 +506,7 @@ class VisualMarkets extends PolymerElement {
         }
         else {
             this.standaloneOrderIsBid = true;
+            this.orderText = 'ENTER BID';
             this._setStandalonePriceInput(price, volume);
         }
     }
@@ -516,6 +521,7 @@ class VisualMarkets extends PolymerElement {
         }
         else {
             this.standaloneOrderIsBid = false;
+            this.orderText = 'ENTER ASK';
             this._setStandalonePriceInput(price, volume);
         }
     }
@@ -739,6 +745,17 @@ class VisualMarkets extends PolymerElement {
     yToHumanReadable(a) {
         return this.$.currency_scaler.yToHumanReadable(a);
     }
+
+    roundToTwo(num) {    
+        return +(Math.round(num + "e+2")  + "e-2");
+    }
+    xToHumanReadableRounded(a) {
+        return this.roundToTwo(this.$.currency_scaler.xToHumanReadable(a));
+    }
+    yToHumanReadableRounded(a) {
+        return this.roundToTwo(this.$.currency_scaler.yToHumanReadable(a));
+    }
+
     displayUtilityFunction(x, y) {
         // return a string with the utility value for x and y, with a maximum of 2 decimal points
         return this.utilityFunction(x, y)

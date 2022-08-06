@@ -6,6 +6,8 @@ from otree_markets.exchange.base import Order, OrderStatusEnum
 from .configmanager import MarketConfig
 import itertools
 
+import js2py
+
 
 class Constants(BaseConstants):
     name_in_url = 'otree_visual_markets'
@@ -135,8 +137,8 @@ class Player(markets_models.Player):
         return MarketConfig.get(config_name, self.round_number, self.id_in_group)
     
     def utility_function(self, x, y):
-        return eval(self.config.utility_function, {'x': x, 'y': y})
-    
+        return js2py.eval_js('function $(x, y) { return ' + self.config.utility_function + '; }')(x, y)
+
     def set_payoff(self):
         config = self.config
 

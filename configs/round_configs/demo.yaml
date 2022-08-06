@@ -21,9 +21,9 @@ trade_box_scale: 0.2
 
 # function for calculating utility given a player's current x and y holdings
 # this calculation is done after scaling, so x and y are fractional values
-# this function needs to be both valid javascript and python code which means available operations are
-# pretty much just limited to arithmetic
-utility_function: "(x ** 0.5) * (y ** 0.5)"
+# this function has to be valid javascript (pre es6, meaning no '**' operator)
+# all of the Math functions are available though
+utility_function: "Math.sqrt(x) * Math.sqrt(y)"
 # the maximum utility value which can be reached by a player
 # this is used to scale displayed utility values when generating the heatmap
 max_utility: 50

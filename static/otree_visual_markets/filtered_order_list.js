@@ -35,7 +35,7 @@ class FilteredOrderList extends OrderList {
                     color: red;
                     line-height: 0.85;
                     height: 100%;
-                    right: 10px;
+                    right: -3px;
                     font-size: 150%;
                     cursor: pointer;
                     user-select: none;

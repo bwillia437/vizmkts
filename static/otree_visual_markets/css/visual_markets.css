@@ -38,14 +38,15 @@ h3 {
 
 .main-container {
     display: flex;
+    flex-direction: row;
     justify-content: space-evenly;
     padding: 10px;
     height: 90vh;
 }
 .right-side {
     position: relative;
-    flex: 0 1 95vh;
-    display: flex;
+    flex-grow: 1;
+    flex-basis: 75vh;
 }
 #results {
     display: none;
@@ -68,7 +69,7 @@ h3 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    flex: 1;
+    flex-grow: 1;
 }
 .list-container {
     display: flex;

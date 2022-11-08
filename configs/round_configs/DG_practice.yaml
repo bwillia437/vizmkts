@@ -1,0 +1,92 @@
+# sample round config
+# all endowments can be specified either as a single number or a list of endowments, one for each player in each group
+# if an endowment list is shorter than the number of players in the group, endowments wrap back around to the beginning
+
+# number of players in each group or null if there's only one group
+players_per_group: null
+
+# starting x (asset) endowment for each player
+x_endowment: 20
+# scaling for x asset
+x_currency_scale: 100
+# heatmap bounds for x asset
+x_bounds: [0, 4]
+
+# starting y (cash) endowment for each player
+y_endowment: 20
+# scaling for y asset
+y_currency_scale: 10000
+# heatmap bounds for y asset
+y_bounds: [0.5, 6.5]
+
+
+trade_box_scale: 0.25
+
+
+piecewise_utility: true
+utility_function: "y < 24.5 ? 0.45397344 + 0.00287666 * (x + 24.5 * y - 0.05 * y*y) : 0.45397344 + 0.00287666 * (x + 0.95 * 24.5 * 24.5)"
+max_utility: 4
+
+# the length of the round in seconds
+period_length: 210
+# the amount the page should wait after the period ends in seconds
+post_round_delay: 25
+
+# whether to draw the heatmap
+heatmap_enabled: false
+static_grid_enabled: false
+
+# utility grid x and y bounds. These will be the bounds if the heatmap_enabled is false
+x_bounds_grid: [0,3]
+y_bounds_grid: [0,3]
+
+
+# this number determines the number of orders to display in the list. if it's 0, then all orders are shown.
+# your own orders are always shown
+show_n_best_orders: 0
+# this number determines the number of trades to display in the list. if it's 0, then all trades are shown.
+show_n_most_recent_trades: 0
+# if true, show only your own trades in the trade list
+show_own_trades_only: false
+
+# this config field enables partial equilibrium treatment on heatmap
+# adds vertical lines at integer values of X and draws hashmarks where these lines intersect the current indifference curve
+# IMPORTANT: when using this treatment, x_currency_scale should be set to 1, or heatmap will not behave as expected
+use_partial_equilibrium: false
+
+show_market_on_heatmap: false
+
+# this config field can be used to disable the order book display on the left side of the interface
+# it replaces the bid/ask/trade boxes and their order inputs with a single box that shows the price/quantity of the
+# proposed bid and allows players to enter it as an order
+show_order_book: true
+
+
+show_trade_dot: false
+
+
+disable_input_entry: false
+
+is_practice: true
+
+
+# these two numbers determine how payoffs will be calculated. the utility given by the player's initial endowment will be multiplied by the "initial" multiplier
+# and their gains will be multiplied by the "gain" multiplier
+payoff_gain_multiplier: 2.5
+payoff_initial_multiplier: 0.10
+
+# this field determines how each player will be assigne a role. this array should be the same length as the number
+# of players in a group. players are assigned a role from this array based on their id_in_group
+role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
+
+# this field determines role-specific overrides for config params. if a role is specified, any config params specified for it
+# will override the params specified above
+role_params:
+  buyer:
+    x_endowment: 0
+    y_endowment: 24
+    piecewise_utility: true
+    utility_function: "x < 9.5 ? -0.3888889 + 0.03703704 * (y + 9.5 * x - 0.5 * x*x) : -0.3888889 + 0.03703704 * (y + 0.5 * 9.5 * 9.5)"
+  seller:
+    x_endowment: 16
+    y_endowment: 0

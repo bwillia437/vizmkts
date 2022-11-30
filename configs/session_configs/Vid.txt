@@ -1,0 +1,2 @@
+VG_10min.yaml
+DG_10min.yaml

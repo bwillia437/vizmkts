@@ -10,21 +10,21 @@ x_endowment: 20
 # scaling for x asset
 x_currency_scale: 100
 # heatmap bounds for x asset
-x_bounds: [0, 24]
+x_bounds: [0.5, 5.5]
 
 # starting y (cash) endowment for each player
 y_endowment: 20
 # scaling for y asset
 y_currency_scale: 10000
 # heatmap bounds for y asset
-y_bounds: [0, 40]
+y_bounds: [0.2, 6]
 
 
 trade_box_scale: 0.25
 
 
 piecewise_utility: true
-utility_function: "y < 24.5 ? -0.04481481 + 0.05925926 * (x + 2.45 * y - 0.05 * y * y) : -0.04481481 + 0.05925926 * (x + 2.45*24.5 - 0.05 * 24.5 * 24.5)"
+utility_function: "0.099 * Math.pow(Math.pow(0.6875*x,0.5) + Math.pow(0.3125*y,0.5),2)"
 max_utility: 4
 
 # the length of the round in seconds
@@ -33,8 +33,8 @@ period_length: 180
 post_round_delay: 20
 
 # whether to draw the heatmap
-heatmap_enabled: true
-static_grid_enabled: false
+heatmap_enabled: false
+static_grid_enabled: true
 
 # utility grid x and y bounds. These will be the bounds if the heatmap_enabled is false
 x_bounds_grid: [0,3]
@@ -54,25 +54,25 @@ show_own_trades_only: false
 # IMPORTANT: when using this treatment, x_currency_scale should be set to 1, or heatmap will not behave as expected
 use_partial_equilibrium: false
 
-show_market_on_heatmap: true
+show_market_on_heatmap: false
 
 # this config field can be used to disable the order book display on the left side of the interface
 # it replaces the bid/ask/trade boxes and their order inputs with a single box that shows the price/quantity of the
 # proposed bid and allows players to enter it as an order
-show_order_book: false
+show_order_book: true
 
 
-show_trade_dot: true
+show_trade_dot: false
 
 
 disable_input_entry: false
 
-is_practice: false
+is_practice: true
 
 
 # these two numbers determine how payoffs will be calculated. the utility given by the player's initial endowment will be multiplied by the "initial" multiplier
 # and their gains will be multiplied by the "gain" multiplier
-payoff_gain_multiplier: 1.5
+payoff_gain_multiplier: 2.25
 payoff_initial_multiplier: 0.20
 
 # this field determines how each player will be assigne a role. this array should be the same length as the number
@@ -83,10 +83,10 @@ role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller", "buy
 # will override the params specified above
 role_params:
   buyer:
-    x_endowment: 0
-    y_endowment: 24
+    x_endowment: 3
+    y_endowment: 23
     piecewise_utility: true
-    utility_function: "x < 9.5 ? -0.3888889 + 0.03703704 * (y + 9.5 * x - 0.5 * x * x) : -0.3888889 + 0.03703704 * (y + 0.5 * 9.5 * 9.5)"
+    utility_function: "0.113 * Math.pow(Math.pow(0.825*x,0.5) + Math.pow(0.175*y,0.5),2)"
   seller:
-    x_endowment: 16
-    y_endowment: 0
+    x_endowment: 11
+    y_endowment: 3

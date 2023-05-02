@@ -10,14 +10,14 @@ x_endowment: 20
 # scaling for x asset
 x_currency_scale: 100
 # heatmap bounds for x asset
-x_bounds: [0, 4]
+x_bounds: [0.5, 5.5]
 
 # starting y (cash) endowment for each player
 y_endowment: 20
 # scaling for y asset
 y_currency_scale: 10000
 # heatmap bounds for y asset
-y_bounds: [0.5, 5]
+y_bounds: [0.2, 6]
 
 
 trade_box_scale: 0.25
@@ -30,7 +30,7 @@ max_utility: 4
 # the length of the round in seconds
 period_length: 180
 # the amount the page should wait after the period ends in seconds
-post_round_delay: 25
+post_round_delay: 20
 
 # whether to draw the heatmap
 heatmap_enabled: false
@@ -67,7 +67,7 @@ show_trade_dot: false
 
 disable_input_entry: false
 
-is_practice: false
+is_practice: true
 
 
 # these two numbers determine how payoffs will be calculated. the utility given by the player's initial endowment will be multiplied by the "initial" multiplier

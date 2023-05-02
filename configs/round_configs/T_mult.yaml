@@ -54,15 +54,15 @@ show_own_trades_only: false
 # IMPORTANT: when using this treatment, x_currency_scale should be set to 1, or heatmap will not behave as expected
 use_partial_equilibrium: false
 
-show_market_on_heatmap: true
+show_market_on_heatmap: false
 
 # this config field can be used to disable the order book display on the left side of the interface
 # it replaces the bid/ask/trade boxes and their order inputs with a single box that shows the price/quantity of the
 # proposed bid and allows players to enter it as an order
-show_order_book: false
+show_order_book: true
 
 
-show_trade_dot: true
+show_trade_dot: false
 
 
 disable_input_entry: false

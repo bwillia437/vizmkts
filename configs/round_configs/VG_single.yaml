@@ -28,9 +28,9 @@ utility_function: "0.099 * Math.pow(Math.pow(0.6875*x,0.5) + Math.pow(0.3125*y,0
 max_utility: 4
 
 # the length of the round in seconds
-period_length: 180
+period_length: 150
 # the amount the page should wait after the period ends in seconds
-post_round_delay: 20
+post_round_delay: 30
 
 # whether to draw the heatmap
 heatmap_enabled: true
@@ -67,7 +67,7 @@ show_trade_dot: true
 
 disable_input_entry: false
 
-is_practice: true
+is_practice: false
 
 
 # these two numbers determine how payoffs will be calculated. the utility given by the player's initial endowment will be multiplied by the "initial" multiplier

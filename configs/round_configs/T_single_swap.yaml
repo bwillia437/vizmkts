@@ -77,7 +77,7 @@ payoff_initial_multiplier: 0.20
 
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
-role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
+role_assignments: ["seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
 
 # this field determines role-specific overrides for config params. if a role is specified, any config params specified for it
 # will override the params specified above

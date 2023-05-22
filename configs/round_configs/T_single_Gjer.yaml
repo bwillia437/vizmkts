@@ -10,21 +10,21 @@ x_endowment: 20
 # scaling for x asset
 x_currency_scale: 100
 # heatmap bounds for x asset
-x_bounds: [0, 20]
+x_bounds: [0, 30]
 
 # starting y (cash) endowment for each player
 y_endowment: 20
 # scaling for y asset
 y_currency_scale: 10000
 # heatmap bounds for y asset
-y_bounds: [0, 30]
+y_bounds: [0, 2400]
 
 
 trade_box_scale: 0.25
 
 
 piecewise_utility: true
-utility_function: "0.099 * Math.pow(Math.pow(0.6875*x,0.5) + Math.pow(0.3125*y,0.5),2)"
+utility_function: "0.3633 * Math.pow(Math.pow(0.9967*x,(-1)) + Math.pow(0.027*y,(-1)),(-1))"
 max_utility: 4
 
 # the length of the round in seconds
@@ -72,21 +72,21 @@ is_practice: false
 
 # these two numbers determine how payoffs will be calculated. the utility given by the player's initial endowment will be multiplied by the "initial" multiplier
 # and their gains will be multiplied by the "gain" multiplier
-payoff_gain_multiplier: 2.25
-payoff_initial_multiplier: 0.20
+payoff_gain_multiplier: 0.70
+payoff_initial_multiplier: 0.50
 
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
-role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
+role_assignments: ["seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
 
 # this field determines role-specific overrides for config params. if a role is specified, any config params specified for it
 # will override the params specified above
 role_params:
   buyer:
-    x_endowment: 3
-    y_endowment: 23
+    x_endowment: 1
+    y_endowment: 1700
     piecewise_utility: true
-    utility_function: "0.113 * Math.pow(Math.pow(0.825*x,0.5) + Math.pow(0.175*y,0.5),2)"
+    utility_function: "Math.pow(Math.pow(0.9967*x,(-1)) + Math.pow(0.0033*y,(-1)),(-1))"
   seller:
-    x_endowment: 11
-    y_endowment: 3
+    x_endowment: 17
+    y_endowment: 100

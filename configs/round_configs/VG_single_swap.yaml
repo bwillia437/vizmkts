@@ -54,15 +54,15 @@ show_own_trades_only: false
 # IMPORTANT: when using this treatment, x_currency_scale should be set to 1, or heatmap will not behave as expected
 use_partial_equilibrium: false
 
-show_market_on_heatmap: false
+show_market_on_heatmap: true
 
 # this config field can be used to disable the order book display on the left side of the interface
 # it replaces the bid/ask/trade boxes and their order inputs with a single box that shows the price/quantity of the
 # proposed bid and allows players to enter it as an order
-show_order_book: true
+show_order_book: false
 
 
-show_trade_dot: false
+show_trade_dot: true
 
 
 disable_input_entry: false
@@ -77,7 +77,7 @@ payoff_initial_multiplier: 0.20
 
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
-role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
+role_assignments: ["seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
 
 # this field determines role-specific overrides for config params. if a role is specified, any config params specified for it
 # will override the params specified above

@@ -10,22 +10,22 @@ x_endowment: 20
 # scaling for x asset
 x_currency_scale: 100
 # heatmap bounds for x asset
-x_bounds: [0, 20]
+x_bounds: [0, 120]
 
 # starting y (cash) endowment for each player
 y_endowment: 20
 # scaling for y asset
 y_currency_scale: 10000
 # heatmap bounds for y asset
-y_bounds: [0, 30]
+y_bounds: [0, 120]
 
 
 trade_box_scale: 0.25
 
 
 piecewise_utility: true
-utility_function: "Math.max(x, y)"
-max_utility: 30
+utility_function: "Math.min(x, y)"
+max_utility: 100
 
 # the length of the round in seconds
 period_length: 180
@@ -62,7 +62,7 @@ show_market_on_heatmap: false
 show_order_book: true
 
 
-show_trade_dot: true
+show_trade_dot: false
 
 
 disable_input_entry: false
@@ -77,16 +77,22 @@ payoff_initial_multiplier: 0.10
 
 # this field determines how each player will be assigne a role. this array should be the same length as the number
 # of players in a group. players are assigned a role from this array based on their id_in_group
-role_assignments: ["buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller", "buyer", "seller"]
+role_assignments: ["typeA", "typeB", "typeC", "typeA", "typeB", "typeC", "typeA", "typeB", "typeC", "typeA", "typeB", "typeC"]
 
 # this field determines role-specific overrides for config params. if a role is specified, any config params specified for it
 # will override the params specified above
 role_params:
-  buyer:
-    x_endowment: 3
-    y_endowment: 23
+  typeA:
+    x_endowment: 10
+    y_endowment: 10
     piecewise_utility: true
-    utility_function: "Math.max(x, y)"
-  seller:
-    x_endowment: 11
-    y_endowment: 3
+    utility_function: "Math.max(2*x, y)"
+  typeB:
+    x_endowment: 80
+    y_endowment: 10
+    piecewise_utility: true
+    utility_function: "Math.max(x, 2*y)"
+  typeC:
+    x_endowment: 10
+    y_endowment: 80
+
